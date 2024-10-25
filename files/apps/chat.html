@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Super secure chat room</title>
+    <link rel="stylesheet" href="chat_files/style.css" />
+</head>
+
+<body>
+<div id="wrapper">
+    <div id="menu">
+        <p class="welcome"><b>Welcome, to the super secure 100% encrypted chat room</b></p>
+    </div>
+
+    <div id="chatbox"></div>
+
+    <form name="message" action="" onSubmit="return sendInput()" autocomplete="off" autocapitalize="off">
+        <input type="text" id="inputbox" name="inputbox" autofocus>
+        <input type="submit" id="submitbtn" name="submit" value="Send"/>
+    </form>
+</div>
+</body>
+
+<script src="chat_files/script.js"></script>
+</html>
