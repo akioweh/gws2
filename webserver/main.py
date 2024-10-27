@@ -5,10 +5,15 @@ from fastapi.responses import FileResponse
 app = FastAPI()
 
 
-@app.get("/")
+@app.get('/')
 async def home():
-    return FileResponse("files/index.html")
+    return FileResponse('files/index.html')
 
 
-app.mount("/shared/", StaticFiles(directory="files/shared"), name="files")
-app.mount("/apps/", StaticFiles(directory="files/apps"), name="apps")
+@app.get('/favicon.ico')
+async def favicon():
+    return FileResponse('files/favicon.ico')
+
+
+app.mount('/shared/', StaticFiles(directory='files/shared'), name='files')
+app.mount('/apps/', StaticFiles(directory='files/apps'), name='apps')
