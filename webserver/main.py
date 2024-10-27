@@ -1,13 +1,14 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 
 app = FastAPI()
 
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
+async def home():
+    return FileResponse("files/index.html")
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app.mount("/shared/", StaticFiles(directory="files/shared"), name="files")
+app.mount("/apps/", StaticFiles(directory="files/apps"), name="apps")
