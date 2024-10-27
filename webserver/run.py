@@ -10,19 +10,21 @@ To execute directly from the terminal, use uvicorn::
 from the project root directory.
 """
 
-from os.path import dirname, abspath, join as path_join
+from os.path import abspath, dirname, join as path_join
+from sys import argv
 
 import uvicorn
 
 __all__ = ['run']
 
 
-def run(working_dir: str = None, reload: bool = True):
+def run(port: int = None, working_dir: str = None, reload: bool = True):
     """Runs the webserver.
     ``working_dir`` shouldn't ever need setting.
     """
     uvicorn.run(
         'webserver:app',
+        port=port,
         reload=reload,
         log_level='debug',
         loop='asyncio',
@@ -41,6 +43,13 @@ if __name__ == '__main__':
     # to the project root directory (the directory containing the webserver package)
     target_cwd = abspath(path_join(dirname(__file__), '..'))
 
-    run(target_cwd)
+    port_ = None
+    if len(argv) > 1:
+        try:
+            port_ = int(argv[1])
+        except ValueError:
+            print('Invalid port number. Using uvicorn default.')
+
+    run(port_, target_cwd)
 
     input('Press enter to exit')
