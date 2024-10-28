@@ -4,9 +4,27 @@
 GET http://127.0.0.1:80/
 Accept: text/html
 
+> {%
+    client.test("Status code is 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+    client.test("Content-Type is text/html", function() {
+        client.assert(response.headers.valueOf("Content-Type") === "text/html; charset=utf-8", "Expected text/html");
+    });
+%}
+
 ### favicon
-GET http://127.0.0.1:80/favicon.icovicon.ico
+GET http://127.0.0.1:80/favicon.ico
 Accept: image/x-icon
+
+> {%
+    client.test("Status code is 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+    client.test("Content-Type is image/x-icon", function() {
+        client.assert(response.headers.valueOf("Content-Type") === "image/x-icon", "Expected image/x-icon");
+    });
+%}
 
 ### process-time
 # ensure process time header is present
