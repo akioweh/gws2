@@ -1,9 +1,25 @@
 # Test your FastAPI endpoints
 
+### root endpoint
 GET http://127.0.0.1:80/
 Accept: text/html
 
-###
-
-GET http://127.0.0.1:80/favicon.ico
+### favicon
+GET http://127.0.0.1:80/favicon.icovicon.ico
 Accept: image/x-icon
+
+### process-time
+# ensure process time header is present
+GET http://127.0.0.1:80/
+Accept: text/html
+
+> {%
+    client.test("Response should have X-Process-Time header", function() {
+        client.assert(response.headers.valueOf('x-process-time') != null,
+            "X-Process-Time header not found.");
+        client.assert(!isNaN(parseFloat(response.headers.valueOf('x-process-time'))),
+            "X-Process-Time header is not number: " + response.headers.valueOf('x-process-time'));
+    });
+%}
+
+###
