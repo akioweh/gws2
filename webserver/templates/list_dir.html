@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{title|e}}</title>
+</head>
+<body>
+<h1>{{title|e}}</h1>
+<hr>
+<ul>
+    {% for link, name in files %}
+    <li><a href="{{link}}">{{name|e}}</a></li>
+    {% endfor %}
+</ul>
+<hr>
+</body>
+</html>

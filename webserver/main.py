@@ -1,10 +1,13 @@
 import time
 
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.templating import Jinja2Templates
+
+from .staticdir import StaticDir
 
 app = FastAPI()
+
+templates = Jinja2Templates(directory='templates')
 
 
 @app.middleware('http')
@@ -16,15 +19,4 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.get('/')
-async def home():
-    return FileResponse('files/index.html')
-
-
-@app.get('/favicon.ico')
-async def favicon():
-    return FileResponse('files/favicon.ico')
-
-
-app.mount('/shared/', StaticFiles(directory='files/shared', html=True), name='files')
-app.mount('/apps/', StaticFiles(directory='files/apps', html=True), name='apps')
+app.mount('/', StaticDir(directory='files'), name='root')
