@@ -40,4 +40,30 @@ Accept: text/html
     });
 %}
 
-###
+### shared listing
+# ensure the directory listing under /shared is available
+GET http://127.0.0.1:80/shared/
+Accept: text/html
+
+> {%
+    client.test("Status code is 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+    client.test("Content-Type is text/html", function() {
+        client.assert(response.headers.valueOf("Content-Type") === "text/html; charset=utf-8", "Expected text/html");
+    });
+%}
+
+### chat app
+# ensure the chat app is available
+GET http://127.0.0.1:80/apps/chat
+Accept: text/html
+
+> {%
+    client.test("Status code is 200", function() {
+        client.assert(response.status === 200, "Expected 200 OK");
+    });
+    client.test("Content-Type is text/html", function() {
+        client.assert(response.headers.valueOf("Content-Type") === "text/html; charset=utf-8", "Expected text/html");
+    });
+%}
