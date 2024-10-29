@@ -240,3 +240,5 @@ cython_debug/
 #.idea/
 
 gws2.iml
+
+run.sh
