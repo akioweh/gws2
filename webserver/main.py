@@ -20,4 +20,8 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
+# noinspection PyTypeChecker
+app.add_middleware(HTTPSRedirectMiddleware)
+
+
 app.mount('/', StaticDir(directory='files'), name='root')
