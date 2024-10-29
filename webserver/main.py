@@ -1,13 +1,10 @@
 import time
 
 from fastapi import FastAPI, Request
-from fastapi.templating import Jinja2Templates
 
 from .staticdir import StaticDir
 
 app = FastAPI()
-
-templates = Jinja2Templates(directory='templates')
 
 
 @app.middleware('http')
