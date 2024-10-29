@@ -5,6 +5,9 @@ that auto-generates directory listings and strips file extensions from URLs.
 E.g., if a file is named `example.html`, it can be accessed via ``/example``.
 `folder/document.pdf` can be accessed via ``/folder/document``.
 """
+
+__all__ = ['StaticDir']
+
 import errno
 import os
 import stat
