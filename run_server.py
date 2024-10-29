@@ -9,5 +9,5 @@ if __name__ == '__main__':
     if args.host is None:
         args.host = '0.0.0.0'
     if args.port is None:
-        args.port = 80
-    run(port=args.port, host=args.host, reload=args.reload)
+        args.port = 443 if args.certfile else 80
+    run(port=args.port, host=args.host, reload=args.reload, keyfile=args.keyfile, certfile=args.certfile)
