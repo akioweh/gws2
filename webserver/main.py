@@ -1,10 +1,14 @@
 import time
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from .staticdir import StaticDir
 
 app = FastAPI()
+
+# noinspection PyTypeChecker
+app.add_middleware(HTTPSRedirectMiddleware)
 
 
 @app.middleware('http')
