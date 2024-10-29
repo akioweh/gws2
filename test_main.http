@@ -1,7 +1,7 @@
 # Test your FastAPI endpoints
 
 ### root endpoint
-GET http://127.0.0.1:80/
+GET https://127.0.0.1/
 Accept: text/html
 
 > {%
@@ -14,7 +14,7 @@ Accept: text/html
 %}
 
 ### favicon
-GET http://127.0.0.1:80/favicon.ico
+GET https://127.0.0.1/favicon.ico
 Accept: image/x-icon
 
 > {%
@@ -28,7 +28,7 @@ Accept: image/x-icon
 
 ### process-time
 # ensure process time header is present
-GET http://127.0.0.1:80/
+GET https://127.0.0.1/
 Accept: text/html
 
 > {%
@@ -42,7 +42,7 @@ Accept: text/html
 
 ### shared listing
 # ensure the directory listing under /shared is available
-GET http://127.0.0.1:80/shared/
+GET https://127.0.0.1/shared/
 Accept: text/html
 
 > {%
@@ -56,7 +56,7 @@ Accept: text/html
 
 ### chat app
 # ensure the chat app is available
-GET http://127.0.0.1:80/apps/chat
+GET https://127.0.0.1/apps/chat
 Accept: text/html
 
 > {%
