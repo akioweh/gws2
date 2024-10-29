@@ -6,7 +6,7 @@ Aksite @ akioweh.com
 
 __author__ = 'akioweh'
 
-from .run import run
 from .main import app
+from .run import parse_args, run
 
-__all__ = ['run', 'app']
+__all__ = ['run', 'app', 'parse_args']

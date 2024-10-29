@@ -10,20 +10,25 @@ To execute directly from the terminal, use uvicorn::
 from the project root directory.
 """
 
+import argparse
 from os.path import abspath, dirname, join as path_join
-from sys import argv
 
 import uvicorn
 
-__all__ = ['run']
+__all__ = ['run', 'parse_args']
 
 
-def run(port: int = None, working_dir: str = None, reload: bool = True):
+def run(port: int = 8000, host: str = '0.0.0.0', working_dir: str = None, reload: bool = False):
     """Runs the webserver.
     ``working_dir`` shouldn't ever need setting.
     """
+    if port is None:
+        port = 8000
+    if host is None:
+        host = '127.0.0.1'
     uvicorn.run(
         'webserver:app',
+        host=host,
         port=port,
         reload=reload,
         log_level='debug',
@@ -31,10 +36,17 @@ def run(port: int = None, working_dir: str = None, reload: bool = True):
         app_dir=working_dir,
         reload_dirs=abspath(dirname(__file__)),
         reload_excludes=[
-            'files/**/*.*',
-            'files/*.*'
+            'files/'
         ]  # changes to resources should not trigger a reload
     )
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--host', type=str, help='Host address to run the server on.')
+    parser.add_argument('-p', '--port', type=int, help='Port number to run the server on.')
+    parser.add_argument('-r', '--reload', action='store_true', help='Enable auto-reload.')
+    return parser.parse_args()
 
 
 if __name__ == '__main__':
@@ -42,14 +54,7 @@ if __name__ == '__main__':
     # in order for Python's relative imports to work, we need to set the working directory
     # to the project root directory (the directory containing the webserver package)
     target_cwd = abspath(path_join(dirname(__file__), '..'))
-
-    port_ = None
-    if len(argv) > 1:
-        try:
-            port_ = int(argv[1])
-        except ValueError:
-            print('Invalid port number. Using uvicorn default.')
-
-    run(port_, target_cwd)
+    args = parse_args()
+    run(port=args.port, host=args.host, working_dir=target_cwd, reload=args.reload)
 
     input('Press enter to exit')
