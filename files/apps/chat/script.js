@@ -1,6 +1,6 @@
 const printMessage = message => {
-    let chatbox = document.getElementById("chatbox");
-    let newMessage = document.createElement("div");
+    const chatbox = document.getElementById("chatbox");
+    const newMessage = document.createElement("div");
     newMessage.className = "chat";
     newMessage.textContent = message;
     chatbox.appendChild(newMessage);
@@ -10,7 +10,7 @@ const printMessage = message => {
 printMessage('TIP: send /sdn [name] to change your display name');
 printMessage('>>> Connecting to server...');
 
-const socket = new WebSocket('ws://139.185.47.36:6969');
+const socket = new WebSocket('wss://139.185.47.36:6969');
 
 socket.onopen = () => {
     printMessage('>>> Connected to server!');
@@ -18,8 +18,9 @@ socket.onopen = () => {
 
 // send message from the form
 const sendInput = () => {
-    let data = this.inputbox.value;
-    this.inputbox.value = '';
+    const inputbox = document.getElementById('inputbox');
+    let data = inputbox.value;
+    inputbox.value = '';
     let op, msg;
 
     if (data.length > 0 && data[0] === '/') {
