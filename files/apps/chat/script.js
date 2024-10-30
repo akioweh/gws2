@@ -10,7 +10,7 @@ const printMessage = message => {
 printMessage('TIP: send /sdn [name] to change your display name');
 printMessage('>>> Connecting to server...');
 
-const socket = new WebSocket('wss://139.185.47.36:6969');
+const socket = new WebSocket('wss://akioweh.com:6969');
 
 socket.onopen = () => {
     printMessage('>>> Connected to server!');
