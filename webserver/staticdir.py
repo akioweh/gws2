@@ -50,7 +50,7 @@ class StaticDir(_StaticFiles):
     @staticmethod
     def _default_hidden_predicate(file: str) -> bool:
         # hide files and directories starting with a dot
-        if file.startswith('.'):
+        if file.startswith('.') and file != '.well-known':  # exception for certbot challenge
             return True
         # hide directories ending with '_files'
         if os.path.isdir(file) and file.endswith('_files'):
