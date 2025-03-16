@@ -1,19 +1,34 @@
+__all__ = ['create_app']
+
 import time
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 
 from .staticdir import StaticDir
 
-app = FastAPI()
 
+def create_app(https_mode: bool = True) -> FastAPI:
+    """We use an app "factory" instead of a standard
+    module-level variable because we need to control
+    whether the ``HTTPSRedirectMiddleware`` is added
+    to our app depending on external factors.
+    """
 
-@app.middleware('http')
-async def add_process_time_header(request: Request, call_next):
-    start = time.perf_counter()
-    response = await call_next(request)
-    process_time = time.perf_counter() - start
-    response.headers['X-Process-Time'] = str(process_time)
-    return response
+    app = FastAPI()
 
+    if https_mode:
+        # noinspection PyTypeChecker
+        app.add_middleware(HTTPSRedirectMiddleware)
 
-app.mount('/', StaticDir(directory='files'), name='root')
+    @app.middleware('http')
+    async def add_process_time_header(request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        process_time = time.perf_counter() - start
+        response.headers['X-Process-Time'] = str(process_time)
+        return response
+
+    app.mount('/', StaticDir(directory='files'), name='root')
+
+    return app

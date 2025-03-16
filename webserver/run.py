@@ -1,60 +1,57 @@
 """
 Run the webserver.
 This file should be able to run the webserver from anywhere (any cwd).
-Alternatively, run run_server.py (in the parent (project) directory).
-
-To execute directly from the terminal, use uvicorn::
-
-    $ uvicorn webserver:app
-
-from the project root directory.
 """
 
 __all__ = ['run', 'parse_cmdline_args', 'run_async']
 
 import argparse
-from os.path import abspath, dirname, join as path_join
+from os.path import abspath, dirname
+
+from webserver.main import create_app
 
 
 def run(
         port: int = None,
         host: str = None,
         *,
-        working_dir: str = None,
         reload: bool = False,
         keyfile: str = None,
         certfile: str = None,
 ):
-    """Runs the webserver.
+    """Runs the webserver with ``uvicorn``.
 
-    ``host`` and ``port`` default to ``127.0.0.1:443``
-    or ``0.0.0.0:80`` if SSL is not enabled.
-    (``0.0.0.0`` is accessible from LAN/beyond while ``127.0.0.1`` is not.)
-
-    ``working_dir`` shouldn't ever need setting.
+    ``host`` and ``port`` default to ``127.0.0.1:80``
+    or ``0.0.0.0:443`` if SSL is enabled.
 
     If both ``keyfile`` and ``certfile`` are provided,
-    the server will run in HTTPS mode.
-    Remember: port 80/8080 for HTTP, port 443/8443 for HTTPS.
+    the server will run with SSL in HTTPS mode.
+
+    Note that ``uvicorn`` doesn't seem to support
+    binding to more than one interface, so we actually
+    cannot achieve HTTP -> HTTPS redirection with just
+    one server instance.
+
+    So...
+    do port remapping on the OS/proxy/router/firewall level :)
     """
 
     import uvicorn
 
-    if port is None:
-        port = 443 if keyfile and certfile else 80
-    if host is None:
-        host = '127.0.0.1' if keyfile and certfile else '0.0.0.0'
-    if keyfile or certfile and not (keyfile and certfile):
+    if bool(certfile) != bool(certfile):
         raise ValueError('Both keyfile and certfile must be provided to enable SSL.')
+    ssl = bool(keyfile)
+    if port is None:
+        port = 443 if ssl else 80
+    if host is None:
+        host = '0.0.0.0' if ssl else '127.0.0.1'
 
     uvicorn.run(
-        'webserver:app',
+        create_app(ssl),
         host=host,
         port=port,
         reload=reload,
         log_level='debug',
-        loop='asyncio',
-        app_dir=working_dir,
         reload_dirs=abspath(dirname(__file__)),
         reload_excludes=['files/'],
         ssl_keyfile=keyfile,
@@ -74,20 +71,20 @@ async def run_async(
 
     import uvicorn
 
-    if port is None:
-        port = 443 if keyfile and certfile else 80
-    if host is None:
-        host = '127.0.0.1' if keyfile and certfile else '0.0.0.0'
-    if (keyfile or certfile) and not (keyfile and certfile):
+    if bool(certfile) != bool(certfile):
         raise ValueError('Both keyfile and certfile must be provided to enable SSL.')
+    ssl = bool(keyfile)
+    if port is None:
+        port = 443 if ssl else 80
+    if host is None:
+        host = '0.0.0.0' if ssl else '127.0.0.1'
 
     config = uvicorn.Config(
-        'webserver:app',
+        create_app(ssl),
         host=host,
         port=port,
         reload=reload,
         log_level='debug',
-        loop='asyncio',
         reload_dirs=abspath(dirname(__file__)),
         reload_excludes=['files/'],
         ssl_keyfile=keyfile,
@@ -115,12 +112,5 @@ def parse_cmdline_args():
 
 
 if __name__ == '__main__':
-    print('Direct execution of ``run.py`` in webserver package.')
-    # in order for Python's relative imports to work, we need to set the working directory
-    # to the project root directory (the directory containing the webserver package)
-    target_cwd = abspath(path_join(dirname(__file__), '..'))
     args = parse_cmdline_args()
-    run(port=args.port, host=args.host, working_dir=target_cwd, reload=args.reload,
-        keyfile=args.keyfile, certfile=args.certfile)
-
-    input('Press enter to exit')
+    run(port=args.port, host=args.host, reload=args.reload, keyfile=args.keyfile, certfile=args.certfile)

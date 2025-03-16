@@ -1,12 +1,11 @@
 import asyncio
-import logging
 import signal
 from argparse import Namespace
 
 import hypercorn
 from hypercorn.asyncio import serve
 
-from webserver import parse_cmdline_args, app, https_redirect_app
+from webserver import parse_cmdline_args, create_app
 
 
 def runner(args: Namespace):
@@ -16,13 +15,11 @@ def runner(args: Namespace):
     conf.keyfile = args.keyfile
     conf.reload = args.reload
     conf.graceful_timeout = 0
+    conf.accesslog = '-'
     if args.ssl:
+        conf.insecure_bind = f'{args.host}:80'
         conf.alpn_protocols.append('h3')
-        conf.quic_bind = f'{args.host}:{args.port}'
-
-    conf2 = hypercorn.Config()
-    conf2.bind = f'{args.host}:80'
-    conf2.keep_alive_timeout = 0
+        conf.quic_bind = conf.bind
 
     async def serve_all():
         signal_event = asyncio.Event()
@@ -42,18 +39,12 @@ def runner(args: Namespace):
                 # Windows crap
                 signal.signal(sig_id, _sig_handler)
 
-        async with asyncio.TaskGroup() as tg:
-            # noinspection PyTypeChecker
-            tg.create_task(serve(app, conf, shutdown_trigger=signal_event.wait))
-            if args.ssl:
-                print('Running in HTTPS mode; HTTP -> HTTPS redirector started')
-                # noinspection PyTypeChecker
-                tg.create_task(serve(https_redirect_app, conf2, shutdown_trigger=signal_event.wait))
+        # noinspection PyTypeChecker
+        await serve(create_app(args.ssl), conf, shutdown_trigger=signal_event.wait)
 
     asyncio.new_event_loop().run_until_complete(serve_all())
 
 
 if __name__ == '__main__':
     args_ = parse_cmdline_args()
-    logging.basicConfig(level=logging.INFO)
     runner(args_)
