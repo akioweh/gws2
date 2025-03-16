@@ -19,7 +19,7 @@ def runner(args: Namespace):
     if args.ssl:
         conf.insecure_bind = f'{args.host}:80'
         conf.alpn_protocols.append('h3')
-        conf.quic_bind = conf.bind
+        conf.quic_bind = conf.bind.copy()
 
     async def serve_all():
         signal_event = asyncio.Event()
