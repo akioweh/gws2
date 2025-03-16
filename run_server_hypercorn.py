@@ -15,10 +15,10 @@ def runner(args: Namespace):
     conf.certfile = args.certfile
     conf.keyfile = args.keyfile
     conf.reload = args.reload
+    conf.graceful_timeout = 0
     if args.ssl:
         conf.alpn_protocols.append('h3')
-        conf.alt_svc_headers.append('h3-29=":443", h3=":443", h2=":443"')
-        conf.quic_bind = conf.bind
+        conf.quic_bind = f'{args.host}:{args.port}'
 
     conf2 = hypercorn.Config()
     conf2.bind = f'{args.host}:80'
@@ -35,6 +35,7 @@ def runner(args: Namespace):
             if (sig_id := getattr(signal, sig, None)) is None:
                 continue
             try:
+                # noinspection PyTypeChecker
                 asyncio.get_running_loop().add_signal_handler(
                     sig_id, _sig_handler)
             except NotImplementedError:
