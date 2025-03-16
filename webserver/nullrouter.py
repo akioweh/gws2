@@ -7,7 +7,7 @@ class NullRouter:
     """A FastAPI mount that has a set static response for all endpoints and requests."""
 
     def __init__(self, response: str = ''):
-        self.response = response
+        self.response = response.encode()
 
     async def __call__(self, scope, receive, send):
         await send({
@@ -19,5 +19,5 @@ class NullRouter:
         })
         await send({
             'type': 'http.response.body',
-            'body': self.response.encode(),
+            'body': self.response,
         })
