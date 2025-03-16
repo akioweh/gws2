@@ -96,13 +96,18 @@ async def run_async(
 def parse_cmdline_args():
     """Helper function to parse standard command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('--host', type=str, help='Host address to run the server on.')
+    parser.add_argument('--host', default='0.0.0.0', help='Host address to run the server on.')
     parser.add_argument('-p', '--port', type=int, help='Port number to run the server on.')
     parser.add_argument('-r', '--reload', action='store_true', help='Enable auto-reload.')
-    parser.add_argument('--keyfile', type=str, help='SSL key file path.')
-    parser.add_argument('--certfile', type=str, help='SSL certificate file path.')
-    parser.add_argument('--ssl', action='store_true', help='Enable SSL.')
-    return parser.parse_args()
+    parser.add_argument('--keyfile', help='SSL key file path.')
+    parser.add_argument('--certfile', help='SSL certificate file path.')
+    _args = parser.parse_args()
+    if bool(_args.keyfile) != bool(_args.certfile):
+        parser.error('Both keyfile and certfile must be provided to enable SSL.')
+    _args.ssl = bool(_args.keyfile)
+    if _args.port is None:
+        _args.port = 443 if _args.ssl else 80  # nominal defaults
+    return _args
 
 
 if __name__ == '__main__':

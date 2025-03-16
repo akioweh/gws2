@@ -24,18 +24,8 @@ def run_https(host: str, port: int, *, keyfile: str, certfile: str, reload: bool
 
 
 if __name__ == '__main__':
-    args_ = parse_cmdline_args()
-    https = False
-    if args_.keyfile or args_.certfile:
-        if not (args_.keyfile and args_.certfile):
-            raise ValueError('Both keyfile and certfile must be provided to enable SSL.')
-        https = True
-    if args_.host is None:
-        args_.host = '0.0.0.0'  # bind to all by default
-    if args_.port is None:
-        args_.port = 443 if https else 80  # nominal defaults
-
-    if https:
-        run_https(host=args_.host, port=args_.port, keyfile=args_.keyfile, certfile=args_.certfile, reload=args_.reload)
+    args = parse_cmdline_args()
+    if args.ssl:
+        run_https(host=args.host, port=args.port, keyfile=args.keyfile, certfile=args.certfile, reload=args.reload)
     else:
-        run(port=args_.port, host=args_.host, reload=args_.reload, keyfile=args_.keyfile, certfile=args_.certfile)
+        run(port=args.port, host=args.host, reload=args.reload, keyfile=args.keyfile, certfile=args.certfile)
