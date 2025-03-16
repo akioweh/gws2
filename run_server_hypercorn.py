@@ -11,13 +11,14 @@ from webserver import parse_cmdline_args, create_app
 def runner(args: Namespace):
     conf = hypercorn.Config()
     conf.bind = f'{args.host}:{args.port}'
+    conf.bind.append(f'{args.host}:80')
     conf.certfile = args.certfile
     conf.keyfile = args.keyfile
     conf.reload = args.reload
     conf.graceful_timeout = 0
     conf.accesslog = '-'
     if args.ssl:
-        conf.insecure_bind = f'{args.host}:80'
+        # conf.insecure_bind = f'{args.host}:80'
         conf.alpn_protocols.append('h3')
         conf.quic_bind = conf.bind.copy()
 
