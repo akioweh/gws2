@@ -15,8 +15,6 @@ __all__ = ['run', 'parse_cmdline_args', 'run_async']
 import argparse
 from os.path import abspath, dirname, join as path_join
 
-import uvicorn
-
 
 def run(
         port: int = None,
@@ -39,6 +37,9 @@ def run(
     the server will run in HTTPS mode.
     Remember: port 80/8080 for HTTP, port 443/8443 for HTTPS.
     """
+
+    import uvicorn
+
     if port is None:
         port = 443 if keyfile and certfile else 80
     if host is None:
@@ -69,7 +70,10 @@ async def run_async(
         keyfile: str = None,
         certfile: str = None,
 ):
-    """Aync version of ``run()``"""
+    """Asynchronous version of ``run()``"""
+
+    import uvicorn
+
     if port is None:
         port = 443 if keyfile and certfile else 80
     if host is None:
