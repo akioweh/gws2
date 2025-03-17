@@ -2,19 +2,19 @@ import asyncio
 import signal
 from argparse import Namespace
 
-import hypercorn
-from hypercorn.asyncio import serve
-
-from webserver import parse_cmdline_args, create_app
+from webserver import parse_cli_args, create_app
 
 
-def runner(args: Namespace):
+def main(args: Namespace):
+    import hypercorn
+    from hypercorn.asyncio import serve
+
     conf = hypercorn.Config()
     conf.bind = f'{args.host}:{args.port}'
     conf.certfile = args.certfile
     conf.keyfile = args.keyfile
     conf.reload = args.reload
-    conf.graceful_timeout = 0
+    conf.graceful_timeout = 1
     conf.accesslog = '-'
     if args.ssl:
         conf.insecure_bind = f'{args.host}:80'
@@ -46,5 +46,5 @@ def runner(args: Namespace):
 
 
 if __name__ == '__main__':
-    args_ = parse_cmdline_args()
-    runner(args_)
+    args_ = parse_cli_args()
+    main(args_)
