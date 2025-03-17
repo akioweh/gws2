@@ -19,9 +19,10 @@ from fastapi import HTTPException
 from fastapi.staticfiles import StaticFiles as _StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.datastructures import URL
-from starlette.responses import FileResponse, RedirectResponse, Response
+from starlette.responses import FileResponse, RedirectResponse, Response, HTMLResponse
 from starlette.staticfiles import PathLike
 from starlette.types import Scope
+import mistletoe
 
 
 class StaticDir(_StaticFiles):
@@ -73,7 +74,8 @@ class StaticDir(_StaticFiles):
         if kwargs.get('html', None) is not None:
             raise ValueError('StaticDir does not support the "html" argument. (It is always True)')
         if kwargs.get('packages', None) is not None:
-            raise ValueError('StaticDir does not support the "packages" argument. It only works with a single directory.')
+            raise ValueError('StaticDir does not support the "packages" argument. '
+                             'It only works with a single directory.')
         super().__init__(directory=directory, html=True, **kwargs)
 
         self.list_dirs = list_dirs
@@ -88,9 +90,9 @@ class StaticDir(_StaticFiles):
             raise FileNotFoundError(f'Template file "{template}" not found in "{template_dir}"')
 
     def get_directories(
-        self,
-        directory: PathLike | None = None,
-        packages: list[str | tuple[str, str]] | None = None,
+            self,
+            directory: PathLike | None = None,
+            packages: list[str | tuple[str, str]] | None = None,
     ) -> list[PathLike]:
         # overridden to return only the one main directory
         return [directory]
@@ -122,57 +124,14 @@ class StaticDir(_StaticFiles):
 
         # file
         if stat_result is not None and stat.S_ISREG(stat_result.st_mode):
-            return self.file_response(full_path, stat_result, scope)
+            return await self.get_response_file(full_path, stat_result, scope)
 
         # directory
         elif stat_result is not None and stat.S_ISDIR(stat_result.st_mode):
-            if not scope['path'].endswith('/'):
-                # Directory URLs should redirect to always end in "/".
-                url = URL(scope=scope)
-                url = url.replace(path=url.path + '/')
-                return RedirectResponse(url=url)
-
-            # Check if we have 'index.html' file to serve.
-            index_path = os.path.join(path, 'index.html')
-            _full_path, _stat_result = await anyio.to_thread.run_sync(self.lookup_path, index_path)
-            if _stat_result is not None and stat.S_ISREG(_stat_result.st_mode):
-                return self.file_response(_full_path, _stat_result, scope)
-
-            # time to list the directory
-            dirlist = os.listdir(full_path)
-            dirlist.sort()
-            dirlist = filter(lambda x: not self.should_hide(os.path.join(full_path, x)), dirlist)
-
-            files_to_list = [('../', '../')]  # always include a link to the parent directory
-            for file_name in dirlist:
-                file_url = file_name  # can just do this and have browsers handle relative paths
-                if os.path.isdir(file_url):
-                    file_url += '/'
-                    file_name += '/'
-                else:
-                    # strip html/htm extension
-                    for ext in ['.html', '.htm']:
-                        if file_name.endswith(ext):
-                            file_name = file_name[:-len(ext)]
-                            file_url = file_url[:-len(ext)]
-                            break
-                file_url = urllib.parse.quote(file_url)  # escape special characters in URLs
-                files_to_list.append((file_url, file_name))
-
-            return self.templates.TemplateResponse(
-                self.template_file,
-                {
-                    'request': scope,
-                    'title': f'Things in {path.replace("\\", "/",)}',
-                    'files': files_to_list,
-                }
-            )
+            return await self.get_response_dir(path, full_path, scope)
 
         # not found
-        full_path, stat_result = await anyio.to_thread.run_sync(self.lookup_path, '404.html')
-        if stat_result is not None and stat.S_ISREG(stat_result.st_mode):
-            return FileResponse(full_path, stat_result=stat_result, status_code=404)
-        raise HTTPException(status_code=404)
+        return await self.get_response_404()
 
     def lookup_path(self, path: str) -> tuple[str, os.stat_result | None]:
         """Given an API-friendly path, return the full OS FS path
@@ -206,3 +165,60 @@ class StaticDir(_StaticFiles):
                     return full_path + ext, os.stat(full_path + ext, follow_symlinks=False)
 
         return '', None
+
+    async def get_response_file(self, full_path: str, stat_result: os.stat_result, scope: Scope) -> Response:
+        # render markdown as html
+        if full_path.endswith('.md'):
+            async with await anyio.open_file(full_path, mode='r', encoding='utf-8') as f:
+                rendered = mistletoe.markdown(await f.readlines())  # todo: cache rendered HTML
+                return HTMLResponse(rendered)
+        return self.file_response(full_path, stat_result, scope)
+
+    async def get_response_dir(self, path: str, full_path: str, scope: Scope) -> Response:
+        if not scope['path'].endswith('/'):
+            # Directory URLs should redirect to always end in "/".
+            url = URL(scope=scope)
+            url = url.replace(path=url.path + '/')
+            return RedirectResponse(url=url)
+
+        # Check if we have 'index.html' file to serve.
+        index_path = os.path.join(path, 'index.html')
+        _full_path, _stat_result = await anyio.to_thread.run_sync(self.lookup_path, index_path)
+        if _stat_result is not None and stat.S_ISREG(_stat_result.st_mode):
+            return self.file_response(_full_path, _stat_result, scope)
+
+        # time to list the directory
+        dirlist = os.listdir(full_path)
+        dirlist.sort()
+        dirlist = filter(lambda x: not self.should_hide(os.path.join(full_path, x)), dirlist)
+
+        files_to_list = [('../', '../')]  # always include a link to the parent directory
+        for file_name in dirlist:
+            file_url = file_name  # can just do this and have browsers handle relative paths
+            if os.path.isdir(file_url):
+                file_url += '/'
+                file_name += '/'
+            else:
+                # strip html/htm extension
+                for ext in ['.html', '.htm']:
+                    if file_name.endswith(ext):
+                        file_name = file_name[:-len(ext)]
+                        file_url = file_url[:-len(ext)]
+                        break
+            file_url = urllib.parse.quote(file_url)  # escape special characters in URLs
+            files_to_list.append((file_url, file_name))
+
+        return self.templates.TemplateResponse(
+            self.template_file,
+            {
+                'request': scope,
+                'title': f'Things in {path.replace("\\", "/", )}',
+                'files': files_to_list,
+            }
+        )
+
+    async def get_response_404(self) -> Response:
+        full_path, stat_result = await anyio.to_thread.run_sync(self.lookup_path, '404.html')
+        if stat_result is not None and stat.S_ISREG(stat_result.st_mode):
+            return FileResponse(full_path, stat_result=stat_result, status_code=404)
+        raise HTTPException(status_code=404)
