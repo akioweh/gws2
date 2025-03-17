@@ -15,6 +15,7 @@ import urllib.parse
 
 import anyio
 import anyio.to_thread
+import mistletoe
 from fastapi import HTTPException
 from fastapi.staticfiles import StaticFiles as _StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -22,7 +23,6 @@ from starlette.datastructures import URL
 from starlette.responses import FileResponse, RedirectResponse, Response, HTMLResponse
 from starlette.staticfiles import PathLike
 from starlette.types import Scope
-import mistletoe
 
 
 class StaticDir(_StaticFiles):
