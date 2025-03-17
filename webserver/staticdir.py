@@ -195,7 +195,7 @@ class StaticDir(_StaticFiles):
         files_to_list = [('../', '../')]  # always include a link to the parent directory
         for file_name in dirlist:
             file_url = file_name  # can just do this and have browsers handle relative paths
-            if os.path.isdir(file_url):
+            if os.path.isdir(os.path.join(full_path, file_name)):
                 file_url += '/'
                 file_name += '/'
             else:
