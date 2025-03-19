@@ -21,12 +21,12 @@ from pathlib import Path
 from typing import Final, AnyStr
 
 import mistletoe
-from fastapi import HTTPException
-from fastapi.templating import Jinja2Templates
 from starlette.datastructures import Headers, URL
+from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import FileResponse, Response, HTMLResponse, RedirectResponse
 from starlette.staticfiles import NotModifiedResponse
+from starlette.templating import Jinja2Templates
 from starlette.types import Scope, Receive, Send
 
 
