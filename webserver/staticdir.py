@@ -196,10 +196,15 @@ class StaticDir:
         )
 
     def get_response_404(self) -> Response:
-        path, stat_result = self.resolve_path('404.html')
-        if stat_result is None:
-            raise HTTPException(status_code=404)
-        return FileResponse(path, stat_result=stat_result, status_code=404)
+        path = self.root_dir / '404.html'
+        try:
+            stat_result = path.stat()
+        except (FileNotFoundError, PermissionError, OSError):
+            pass
+        else:
+            if stat.S_ISREG(stat_result.st_mode):
+                return FileResponse(path, stat_result=stat_result, status_code=404)
+        raise HTTPException(status_code=404)
 
     async def push_asset_dir(self, dir_path: Path, request: Request) -> None:
         # i am probably doing this horribly wrong
