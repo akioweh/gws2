@@ -94,7 +94,7 @@ class StaticDir:
         rel_path = path[len(root):]
         return rel_path
 
-    def resolve_path(self, rel_path: str) -> tuple[Path | None, os.stat_result | None]:
+    def resolve_path(self, rel_path: str) -> tuple[Path, os.stat_result] | tuple[None, None]:
         """Resolves a relative API path to an absolute OS FS path
         while also checking for existence and legality.
 
