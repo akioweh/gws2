@@ -20,7 +20,7 @@ from email.utils import parsedate
 from itertools import filterfalse
 from os import PathLike
 from pathlib import Path
-from typing import Final, AnyStr, Awaitable
+from typing import Final, AnyStr
 
 import mistletoe
 from starlette.datastructures import Headers, URL
@@ -30,20 +30,6 @@ from starlette.responses import FileResponse, Response, HTMLResponse, RedirectRe
 from starlette.staticfiles import NotModifiedResponse
 from starlette.templating import Jinja2Templates
 from starlette.types import Scope, Receive, Send
-
-
-class ResponseWrapper:
-    def __init__(self, response: Response, /, pre_send: Awaitable[None] = None):
-        self.response = response
-        self.pre_send = pre_send
-
-    def __getattr__(self, item):
-        return getattr(self.response, item)
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if self.pre_send:
-            await self.pre_send
-        await self.response(scope, receive, send)
 
 
 class StaticDir:
@@ -191,10 +177,6 @@ class StaticDir:
         response = FileResponse(path, stat_result=stat_result)
         if self.is_not_modified(request.headers, response.headers):
             return NotModifiedResponse(response.headers)
-        if 'http.response.push' in request.scope.get('extensions', ()):
-            if linked_deps := self.asset_dependencies(path, stat_result):
-                response = ResponseWrapper(response,
-                                           self.push_assets(linked_deps, request.scope, request._send))
         return response
 
     def get_response_dir(self, path: Path, rel_path: str, request: Request) -> Response:
