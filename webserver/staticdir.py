@@ -14,13 +14,16 @@ import os
 import posixpath
 import stat
 import urllib.parse
-from collections.abc import Sequence, Callable
+from collections.abc import Sequence, Callable, Iterable
+from contextlib import suppress
 from email.utils import parsedate
+from itertools import filterfalse
 from os import PathLike
 from pathlib import Path
 from typing import Final, AnyStr
 
 import mistletoe
+from starlette.background import BackgroundTask
 from starlette.datastructures import Headers, URL
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
@@ -47,6 +50,7 @@ class StaticDir:
         # archives
         '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.lz', '.lzma', '.lzo', '.zst', '.zstd',
     )
+    HTML_EXTENSIONS: Final[tuple[str]] = '.html', '.htm'
 
     @staticmethod
     def _default_hidden_predicate(item: os.DirEntry[str]) -> bool:
@@ -84,13 +88,14 @@ class StaticDir:
         self.should_hide = hidden_predicate
 
     @staticmethod
-    def convert_path(scope: Scope) -> str:
+    def get_rel_path(scope: Scope) -> str:
         """Converts an HTTP path from the ASGI scope to a relative API path"""
         path: str = scope['path']
         root = scope.get('root_path', '')
         if not root.endswith('/'):
             root += '/'
-        assert path.startswith(root)  # should not happen if routing is correct
+        if not path.startswith(root):  # should not happen if routing is correct
+            raise HTTPException(status_code=404)
         rel_path = path[len(root):]
         return rel_path
 
@@ -101,41 +106,52 @@ class StaticDir:
         Returns ``pathlib.Path`` and ``os.stat_result``, or two Nones if resolution failed.
         """
         if rel_path.startswith('/'):
-            return None, None  # happens if request is like "GET //"
-        abs_path = self.root_dir / rel_path
-        try:
-            path = abs_path.resolve()
-            # first, check for existence
-            if not path.exists() and not rel_path.endswith('/'):  # could still be valid if extension is implicit
-                parent_dir = path.parent
-                if not parent_dir.is_dir():
-                    return None, None
-                # prioritize checking for .html files
-                if os.path.isfile(path.with_suffix('.html')):
-                    path = path.with_suffix('.html')
-                elif os.path.isfile(path.with_suffix('.htm')):
-                    path = path.with_suffix('.htm')
-                else:
-                    base_name = path.name
-                    for candidate in parent_dir.glob(f'{base_name}.*', case_sensitive=True):
-                        if candidate.suffix in self.implicit_exts:
-                            path = candidate
-                            break
+            return None, None  # happens if request is like "GET //..." and root is "/"
+        raw_path = self.root_dir / rel_path
+
+        try:  # 1:1 FS path matching
+            path = raw_path.resolve(strict=True)
             stat_result = path.lstat()
-        except (PermissionError, FileNotFoundError, OSError):
-            return None, None
-        # then, check for legality
+        except (OSError, PermissionError, FileNotFoundError):
+            # maybe extension is implicit?
+            if not (name := rel_path.rpartition('/')[-1]):
+                return None, None  # nope, slash-endings cannot be files
+            if not (parent_dir := raw_path.parent).is_dir():
+                return None, None  # nope, more than just the file does not resolve
+            if any(  # check for .htm* files
+                    (new_path := Path(parent_dir, f'{name}{ext}')).is_file()
+                    for ext in self.HTML_EXTENSIONS
+            ) or any(  # check for other implicit extensions
+                (new_path := file).suffix in self.implicit_exts and file.is_file()
+                for file in parent_dir.glob(f'{name}.*', case_sensitive=True)
+            ):
+                path = new_path
+            else:
+                return None, None
+            stat_result = path.lstat()
+
+        # finally, check for legality
         if not path.is_relative_to(self.root_dir):
             return None, None  # directory traversal!
         return path, stat_result
 
+    def path_for(self, scope: Scope, fs_path: Path, trim_ext: bool = False) -> str:
+        """Gets the absolute HTTP path for a given file.
+        Assumes the input path is valid and exists.
+        """
+        api_root = scope.get('root_path', '')
+        rel_path = fs_path.relative_to(self.root_dir).as_posix()
+        if fs_path.suffix in self.HTML_EXTENSIONS or (trim_ext and fs_path.suffix in self.implicit_exts):
+            rel_path = rel_path.removesuffix(fs_path.suffix)
+        return posixpath.join('/', api_root, rel_path)
+
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope, receive, send)
-        rel_path = self.convert_path(scope)
-        response = await self.handle_request(rel_path, request)
+        rel_path = self.get_rel_path(scope)
+        response = self.handle_request(rel_path, request)
         await response(scope, receive, send)
 
-    async def handle_request(self, rel_path: str, request: Request) -> Response:
+    def handle_request(self, rel_path: str, request: Request) -> Response:
         if request.method not in ('GET', 'HEAD'):
             raise HTTPException(status_code=405)
         path, stat_result = self.resolve_path(rel_path)
@@ -143,7 +159,7 @@ class StaticDir:
             return self.get_response_404()
 
         if stat.S_ISREG(stat_result.st_mode):
-            return await self.get_response_file(path, stat_result, request)
+            return self.get_response_file(path, stat_result, request)
         elif stat.S_ISDIR(stat_result.st_mode):
             if not self.list_dirs:
                 return self.get_response_404()
@@ -151,38 +167,38 @@ class StaticDir:
                 url = URL(scope=request.scope)
                 url = url.replace(path=url.path + '/')
                 return RedirectResponse(url=url)
-            return await self.get_response_dir(path, rel_path, request)
-        else:
-            raise RuntimeError('wtf')
+            return self.get_response_dir(path, rel_path, request)
 
-    async def get_response_file(self, path: Path, stat_result: os.stat_result, request: Request) -> Response:
+        raise HTTPException(status_code=404)  # some other FS object
+
+    def get_response_file(self, path: Path, stat_result: os.stat_result, request: Request) -> Response:
         if path.suffix == '.md':
             rendered = mistletoe.markdown(path.read_text())  # todo: cache rendered HTML
             return HTMLResponse(rendered)
         response = FileResponse(path, stat_result=stat_result)
         if self.is_not_modified(request.headers, response.headers):
             return NotModifiedResponse(response.headers)
-        if (assets_dir := path.parent / (path.stem + '_files')).is_dir():
-            await self.push_asset_dir(assets_dir, request)
+        if 'http.response.push' in request.scope.get('extensions', ()):
+            if linked_deps := self.asset_dependencies(path, stat_result):
+                response.background = BackgroundTask(self.push_assets, linked_deps, request)
         return response
 
-    async def get_response_dir(self, path: Path, rel_path: str, request: Request) -> Response:
-        # check if we have 'index.html' file to serve
-        index_path = path / 'index.html'
-        if index_path.is_file():
-            return await self.get_response_file(index_path, index_path.stat(), request)
+    def get_response_dir(self, path: Path, rel_path: str, request: Request) -> Response:
+        if any(  # check if we have 'index.htm?' file to serve
+                (index_path := (path / f'index{ext}')).is_file()
+                for ext in self.HTML_EXTENSIONS
+        ):
+            return self.get_response_file(index_path, index_path.stat(), request)
 
         # otherwise, list the directory
         # list[tuple[link, display_name]]
         listing = [('../', '../')]  # always include a link to the parent directory
-        for item in os.scandir(path):
-            if self.should_hide(item):
-                continue
+        for item in filterfalse(self.should_hide, os.scandir(path)):
             file_name = item.name
             if item.is_dir():
                 file_name += '/'
-            else:
-                file_name = file_name.removesuffix('.html').removesuffix('.htm')
+            elif any(file_name.endswith(ext := ext_) for ext_ in self.HTML_EXTENSIONS):
+                file_name = file_name.removesuffix(ext)
             file_url = urllib.parse.quote(file_name)
             listing.append((file_url, file_name))
 
@@ -196,26 +212,29 @@ class StaticDir:
         )
 
     def get_response_404(self) -> Response:
-        path = self.root_dir / '404.html'
-        try:
-            stat_result = path.stat()
-        except (FileNotFoundError, PermissionError, OSError):
-            pass
-        else:
-            if stat.S_ISREG(stat_result.st_mode):
-                return FileResponse(path, stat_result=stat_result, status_code=404)
+        for ext in self.HTML_EXTENSIONS:
+            path = self.root_dir / f'404{ext}'
+            with suppress(FileNotFoundError, PermissionError, OSError):
+                if stat.S_ISREG((stat_result := path.stat()).st_mode):
+                    return FileResponse(path, stat_result=stat_result, status_code=404)
         raise HTTPException(status_code=404)
 
-    async def push_asset_dir(self, dir_path: Path, request: Request) -> None:
-        # i am probably doing this horribly wrong
-        if 'http.response.push' not in request.scope.get('extensions', ()):
-            return
-        assert dir_path.is_dir()
-        rel_path = dir_path.relative_to(self.root_dir).as_posix()
-        rel_path = posixpath.join('/', request.scope['root_path'], rel_path)
-        paths = (f'{rel_path}/{item}' for item in os.listdir(dir_path))
-        promises = (request.send_push_promise(path) for path in paths)
+    async def push_assets(self, paths: Iterable[Path], request: Request) -> None:
+        urls = (self.path_for(request.scope, path) for path in paths)
+        promises = (request.send_push_promise(url) for url in urls)
         await asyncio.gather(*promises)
+
+    def asset_dependencies(self, path: Path, stat_result: os.stat_result) -> list[Path]:
+        """Returns a list of asset dependencies for the given path, if any."""
+        if not stat.S_ISREG(stat_result.st_mode) or path.suffix not in self.HTML_EXTENSIONS:
+            return []
+        # we only deal with HTML files
+        # ...and for now we shortcut on MS-Office generated htm formats
+        asset_dir = path.parent / (path.stem + '_files')
+        try:
+            return [asset_dir / item for item in os.listdir(asset_dir)]
+        except (FileNotFoundError, PermissionError, OSError):
+            return []
 
     @staticmethod
     def is_not_modified(request_headers: Headers, response_headers: Headers) -> bool:
