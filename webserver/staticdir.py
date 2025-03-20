@@ -20,17 +20,30 @@ from email.utils import parsedate
 from itertools import filterfalse
 from os import PathLike
 from pathlib import Path
-from typing import Final, AnyStr
+from typing import Final, AnyStr, Awaitable
 
 import mistletoe
-from starlette.background import BackgroundTask
 from starlette.datastructures import Headers, URL
 from starlette.exceptions import HTTPException
-from starlette.requests import Request
+from starlette.requests import Request, SERVER_PUSH_HEADERS_TO_COPY
 from starlette.responses import FileResponse, Response, HTMLResponse, RedirectResponse
 from starlette.staticfiles import NotModifiedResponse
 from starlette.templating import Jinja2Templates
 from starlette.types import Scope, Receive, Send
+
+
+class ResponseWrapper:
+    def __init__(self, response: Response, /, pre_send: Awaitable[None] = None):
+        self.response = response
+        self.pre_send = pre_send
+
+    def __getattr__(self, item):
+        return getattr(self.response, item)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if self.pre_send:
+            await self.pre_send
+        await self.response(scope, receive, send)
 
 
 class StaticDir:
@@ -178,9 +191,10 @@ class StaticDir:
         response = FileResponse(path, stat_result=stat_result)
         if self.is_not_modified(request.headers, response.headers):
             return NotModifiedResponse(response.headers)
-        # if 'http.response.push' in request.scope.get('extensions', ()):
-        #     if linked_deps := self.asset_dependencies(path, stat_result):
-        #         response.background = BackgroundTask(self.push_assets, linked_deps, request)
+        if 'http.response.push' in request.scope.get('extensions', ()):
+            if linked_deps := self.asset_dependencies(path, stat_result):
+                response = ResponseWrapper(response,
+                                           self.push_assets(linked_deps, request.scope, request._send))
         return response
 
     def get_response_dir(self, path: Path, rel_path: str, request: Request) -> Response:
@@ -219,9 +233,15 @@ class StaticDir:
                     return FileResponse(path, stat_result=stat_result, status_code=404)
         raise HTTPException(status_code=404)
 
-    async def push_assets(self, paths: Iterable[Path], request: Request) -> None:
-        urls = (self.path_for(request.scope, path) for path in paths)
-        promises = (request.send_push_promise(url) for url in urls)
+    async def push_assets(self, paths: Iterable[Path], scope: Scope, send: Send) -> None:
+        urls = (self.path_for(scope, path) for path in paths)
+        headers = Headers(scope=scope)
+        headers_filtered = tuple(
+            (k.encode('latin-1'), v.encode('latin-1'))
+            for k in SERVER_PUSH_HEADERS_TO_COPY
+            for v in headers.getlist(k)
+        )
+        promises = (send({'type': 'http.response.push', 'path': url, 'headers': headers_filtered}) for url in urls)
         await asyncio.gather(*promises)
 
     def asset_dependencies(self, path: Path, stat_result: os.stat_result) -> list[Path]:
