@@ -178,9 +178,9 @@ class StaticDir:
         response = FileResponse(path, stat_result=stat_result)
         if self.is_not_modified(request.headers, response.headers):
             return NotModifiedResponse(response.headers)
-        if 'http.response.push' in request.scope.get('extensions', ()):
-            if linked_deps := self.asset_dependencies(path, stat_result):
-                response.background = BackgroundTask(self.push_assets, linked_deps, request)
+        # if 'http.response.push' in request.scope.get('extensions', ()):
+        #     if linked_deps := self.asset_dependencies(path, stat_result):
+        #         response.background = BackgroundTask(self.push_assets, linked_deps, request)
         return response
 
     def get_response_dir(self, path: Path, rel_path: str, request: Request) -> Response:
