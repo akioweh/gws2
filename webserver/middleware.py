@@ -4,7 +4,7 @@ import time
 from collections.abc import Awaitable
 
 # noinspection PyProtectedMember
-from starlette.middleware import _MiddlewareClass
+from starlette.middleware import _MiddlewareFactory
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.types import Scope, Receive, Send, Message, ASGIApp
 
@@ -12,8 +12,8 @@ from starlette.types import Scope, Receive, Send, Message, ASGIApp
 # basically, without this abomination of type "hinting" (more like smashing than hinting)
 # we get type errors when these classes are passed into app.add_middleware()... :(
 # noinspection PyTypeChecker
-HTTPSRedirectMiddleware: _MiddlewareClass = HTTPSRedirectMiddleware
-ServerTimingMiddleware: _MiddlewareClass
+HTTPSRedirectMiddleware: _MiddlewareFactory = HTTPSRedirectMiddleware
+ServerTimingMiddleware: _MiddlewareFactory
 
 
 class ServerTimingMiddleware:
