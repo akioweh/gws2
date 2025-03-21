@@ -18,7 +18,7 @@ def create_app(redirect_insecure: bool = True) -> FastAPI:
     if redirect_insecure:
         app.add_middleware(HTTPSRedirectMiddleware)
 
-    app.add_middleware(ServerTimingMiddleware)
+    # app.add_middleware(ServerTimingMiddleware)
 
     app.mount('/', StaticDir(directory='files'), name='root')
 
