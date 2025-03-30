@@ -19,4 +19,5 @@ jobs:
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt
-            sudo systemctl restart gws2.service
+            sudo systemctl restart gws2
+            sudo nginx -t && sudo systemctl reload nginx
