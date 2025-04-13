@@ -9,27 +9,7 @@
 </head>
 
 <body class="stackedit">
-  <div class="stackedit__left">
-    <div class="stackedit__toc">
-      
-<ul>
-<li><a href="#formal-language--grammar">Formal Language & Grammar</a>
-<ul>
-<li>
-<ul>
-<li></li>
-</ul>
-</li>
-<li><a href="#grammar">Grammar</a></li>
-</ul>
-</li>
-</ul>
-
-    </div>
-  </div>
-  <div class="stackedit__right">
-    <div class="stackedit__html">
-      <h1 id="formal-language--grammar">Formal Language &amp; Grammar</h1>
+  <div class="stackedit__html"><h1 id="formal-language--grammar">Formal Language &amp; Grammar</h1>
 <p>A <strong>Language</strong> <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">L</span></span></span></span></span> is a set of finite-length strings<br>
 <span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>L</mi><mo>⊆</mo><mi mathvariant="normal">Σ</mi><msup><mrow></mrow><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">L \subseteq \Sigma{}^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.8193em; vertical-align: -0.13597em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">⊆</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.738696em; vertical-align: 0em;"></span><span class="mord">Σ</span><span class="mord"><span class="mord"></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.738696em;"><span class="" style="top: -3.113em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span></span></span></p>
 <p>where <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi></mrow><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord">Σ</span></span></span></span></span> is its <em>alphabet/vocabulary</em>,  the set of atomic <em>symbols</em> allowed in the language.<br>
@@ -42,14 +22,6 @@
 <p>To precisely define the contents of <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi></mrow><annotation encoding="application/x-tex">L</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">L</span></span></span></span></span>, a language also has some <em>formation rules</em>. These rules govern how symbols may be concatenated into <em>well-formed</em> (allowed) strings;<br>
 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>=</mo><mo stretchy="false">{</mo><mi>w</mi><mo>∈</mo><mi mathvariant="normal">Σ</mi><msup><mrow></mrow><mo>∗</mo></msup><mo>∣</mo><mi>w</mi><mtext>&nbsp;is&nbsp;well-formed</mtext><mo stretchy="false">}</mo></mrow><annotation encoding="application/x-tex">L = \{ w \in \Sigma{}^* \mid w \ \text{is well-formed} \}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal">L</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mopen">{</span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">Σ</span><span class="mord"><span class="mord"></span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.688696em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.02691em;">w</span><span class="mspace">&nbsp;</span><span class="mord text"><span class="mord">is&nbsp;well-formed</span></span><span class="mclose">}</span></span></span></span></span></p>
 <p>One formal way to define well-formed-ness is via a <strong>Grammar</strong>.</p>
-<hr>
-<h4 id="alphabet--vocabulary">Alphabet / Vocabulary</h4>
-<p><span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Σ</mi></mrow><annotation encoding="application/x-tex">\Sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord">Σ</span></span></span></span></span> is the set of all (atomic) <em>symbols</em> allowed, divisible into <em>logical symbols</em> <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi></mrow><annotation encoding="application/x-tex">\sigma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.03588em;">σ</span></span></span></span></span> and <em>non-logical symbols</em> <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi></mrow><annotation encoding="application/x-tex">\mu</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.625em; vertical-align: -0.19444em;"></span><span class="mord mathnormal">μ</span></span></span></span></span>:<br>
-<span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi mathvariant="normal">Σ</mi><mo>=</mo><mo stretchy="false">⟨</mo><mrow><mi>σ</mi><mo separator="true">,</mo><mi>μ</mi></mrow><mo stretchy="false">⟩</mo></mrow><annotation encoding="application/x-tex">
-\Sigma = \braket{\sigma, \mu}
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord">Σ</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="minner"><span class="mopen">⟨</span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.03588em;">σ</span><span class="mpunct">,</span><span class="mspace" style="margin-right: 0.166667em;"></span><span class="mord mathnormal">μ</span></span><span class="mclose">⟩</span></span></span></span></span></span></span></p>
-<p>Logical symbols have constant meanings defined by the language syntax.<br>
-Non-logical symbols are analogous to variables; their meanings are semantic and given by the <em>model</em>/<em>structure</em>/<em>interpretation</em> of a formula.</p>
 <h2 id="grammar">Grammar</h2>
 <blockquote>
 <p>A Grammar is a specialized semi-Thue string rewriting system.</p>
@@ -195,9 +167,7 @@ c-328 0 0 0 0 0l10 8c26.7 20 65.7 43 117 69-2.7 2-6 3.7-10 5-36.7 16-72.3 37.3
 </li>
 </ol>
 </section>
-
-    </div>
-  </div>
+</div>
 </body>
 
 </html>
