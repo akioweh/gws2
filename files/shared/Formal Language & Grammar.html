@@ -112,7 +112,7 @@ As such, each type’s constraints <strong>include those of superclasses</strong
 <p>Production Rule <strong>Constraints</strong>:<br>
 None</p>
 <p><strong>Automata Recognition</strong>: <a href="https://en.wikipedia.org/wiki/Turing_machine">Turing Machine</a></p>
-<p><strong>Closure</strong>: brrrrr</p>
+<p><strong>Closure</strong>: All EXCEPT complement</p>
 <p>“Root-type”; (Chomsky) Grammar is recursively enumerable;<br>
 No constraints on Production Rules.</p>
 <blockquote>
@@ -123,19 +123,13 @@ No constraints on Production Rules.</p>
 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">∣</mi><mi>α</mi><mi mathvariant="normal">∣</mi><mo>≤</mo><mi mathvariant="normal">∣</mi><mi>β</mi><mi mathvariant="normal">∣</mi></mrow><annotation encoding="application/x-tex">|\alpha| \le |\beta|</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.0037em;">α</span><span class="mord">∣</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">≤</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord">∣</span><span class="mord mathnormal" style="margin-right: 0.05278em;">β</span><span class="mord">∣</span></span></span></span></span></p>
 <p>I.e., LHS not longer than RHS</p>
 <p><strong>Automata Recognition</strong>: <a href="https://en.wikipedia.org/wiki/Linear_bounded_automaton">Linear-bounded</a></p>
-<p><strong>Closure</strong></p>
-<ul>
-<li>blah blah</li>
-</ul>
+<p><strong>Closure</strong>: All (except <em>string homomorphism</em>)</p>
 <h3 id="type-2----context-free">Type-2 – Context-Free</h3>
 <p>Production Rule <strong>Constraints</strong>:<br>
 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>∈</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">\alpha \in N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal" style="margin-right: 0.0037em;">α</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.10903em;">N</span></span></span></span></span></p>
 <p>I.e., LHS is a single nonterminal symbol</p>
-<p><strong>Automata Recognition</strong>: <a href="https://en.wikipedia.org/wiki/Pushdown_automaton">Pushdown</a></p>
-<p><strong>Closure</strong></p>
-<ul>
-<li>blah blah</li>
-</ul>
+<p><strong>Automata Recognition</strong>: (Nondeterministic) <a href="https://en.wikipedia.org/wiki/Pushdown_automaton">Pushdown</a></p>
+<p><strong>Closure</strong>: All EXCEPT union and intersection</p>
 <h3 id="type-3----regular">Type-3 – Regular</h3>
 <p>Production Rule <strong>Constraints</strong>:<br>
 <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi><mo>=</mo><mi mathvariant="normal">n</mi><mi>s</mi><mo>∨</mo><mi>β</mi><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">\beta = \mathrm{n}s \lor \beta = s</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord mathnormal" style="margin-right: 0.05278em;">β</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.55556em; vertical-align: 0em;"></span><span class="mord mathrm">n</span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right: 0.222222em;"></span><span class="mbin">∨</span><span class="mspace" style="margin-right: 0.222222em;"></span></span><span class="base"><span class="strut" style="height: 0.88888em; vertical-align: -0.19444em;"></span><span class="mord mathnormal" style="margin-right: 0.05278em;">β</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.43056em; vertical-align: 0em;"></span><span class="mord mathnormal">s</span></span></span></span></span><br>
@@ -144,16 +138,13 @@ OR (but same within one grammar)<br>
 where <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>∈</mo><msup><mi mathvariant="normal">Σ</mi><mo>∗</mo></msup></mrow><annotation encoding="application/x-tex">s \in \Sigma^*</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathnormal">s</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.688696em; vertical-align: 0em;"></span><span class="mord"><span class="mord">Σ</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height: 0.688696em;"><span class="" style="top: -3.063em; margin-right: 0.05em;"><span class="pstrut" style="height: 2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mbin mtight">∗</span></span></span></span></span></span></span></span></span></span></span></span>, <span class="katex--inline"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">n</mi><mo>∈</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">\mathrm{n} \in N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 0.5782em; vertical-align: -0.0391em;"></span><span class="mord mathrm">n</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 0.68333em; vertical-align: 0em;"></span><span class="mord mathnormal" style="margin-right: 0.10903em;">N</span></span></span></span></span></p>
 <p>I.e., RHS contains at most one nonterminal, as the leftmost or rightmost symbol (with the placement consistent within the grammar).</p>
 <p><strong>Automata Recognition</strong>: <a href="https://en.wikipedia.org/wiki/Finite-state_machine">Finite-state</a></p>
-<p><strong>Closure</strong></p>
-<ul>
-<li>blah blah</li>
-</ul>
+<p><strong>Closure</strong>: All</p>
 <blockquote>
 <p>Alternatively, regular grammars are either left- or right- <em>linear</em> grammars.<br>
 <em>Linear</em> grammars have at most one nonterminal in the RHS.<br>
 Left- or right- ness is said if the position of the nonterminal is limited to the left- or right- most positions.</p>
 </blockquote>
-<p>A regular language can be defined by both regular grammars and <em>regular expressions</em>.</p>
+<p><em>Regular expressions</em> are a special notation for regular grammars.</p>
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
