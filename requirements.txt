@@ -1,4 +1,4 @@
 fastapi~=0.115.12
-starlette~=0.46.1
+starlette>=0.46.0,<0.48
 mistletoe~=1.4.0
-granian~=2.2.0
+granian~=2.3.0
