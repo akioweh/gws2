@@ -50,6 +50,7 @@ class StaticDir:
         '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.lz', '.lzma', '.lzo', '.zst', '.zstd',
     )
     HTML_EXTENSIONS: Final[tuple[str, ...]] = '.html', '.htm'
+    AUTO_STRIP_EXTENSIONS: Final[tuple[str, ...]] = HTML_EXTENSIONS + ('.md',)
 
     @staticmethod
     def _default_hidden_predicate(item: os.DirEntry[str]) -> bool:
@@ -158,7 +159,7 @@ class StaticDir:
             return self.get_response_404()
 
         if stat.S_ISREG(stat_result.st_mode):
-            return self.get_response_file(path, stat_result, request)
+            return self.get_response_file(path, stat_result, rel_path, request)
         elif stat.S_ISDIR(stat_result.st_mode):
             if not self.list_dirs:
                 return self.get_response_404()
@@ -170,8 +171,8 @@ class StaticDir:
 
         raise HTTPException(status_code=404)  # some other FS object
 
-    def get_response_file(self, path: Path, stat_result: os.stat_result, request: Request) -> Response:
-        if path.suffix == '.md':
+    def get_response_file(self, path: Path, stat_result: os.stat_result, rel_path: str, request: Request) -> Response:
+        if path.suffix == '.md' and not rel_path.endswith('.md'):  # do not render (serve raw) if explicit extension
             rendered = mistletoe.markdown(path.read_text())  # todo: cache rendered HTML
             return HTMLResponse(rendered)
         response = FileResponse(path, stat_result=stat_result)
@@ -184,7 +185,7 @@ class StaticDir:
                 (index_path := (path / f'index{ext}')).is_file()
                 for ext in self.HTML_EXTENSIONS
         ):
-            return self.get_response_file(index_path, index_path.stat(), request)
+            return self.get_response_file(index_path, index_path.stat(), rel_path,request)
 
         # otherwise, list the directory
         # list[tuple[link, display_name]]
@@ -193,7 +194,7 @@ class StaticDir:
             file_name = item.name
             if item.is_dir():
                 file_name += '/'
-            elif any(file_name.endswith(ext := ext_) for ext_ in self.HTML_EXTENSIONS):
+            elif any(file_name.endswith(ext := ext_) for ext_ in self.AUTO_STRIP_EXTENSIONS):
                 file_name = file_name.removesuffix(ext)
             file_url = urllib.parse.quote(file_name)
             listing.append((file_url, file_name))
