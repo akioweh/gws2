@@ -20,9 +20,9 @@ from email.utils import parsedate
 from itertools import filterfalse
 from os import PathLike
 from pathlib import Path
-from typing import Final, AnyStr
+from typing import Final
 
-import mistletoe
+import mistletoe  # type: ignore
 from starlette.datastructures import Headers, URL
 from starlette.exceptions import HTTPException
 from starlette.requests import Request, SERVER_PUSH_HEADERS_TO_COPY
@@ -33,7 +33,7 @@ from starlette.types import Scope, Receive, Send
 
 
 class StaticDir:
-    _DEFAULT_IMPLICIT_EXTS: Final[tuple[str]] = (
+    _DEFAULT_IMPLICIT_EXTS: Final[tuple[str, ...]] = (
         # basic text markup
         '.html', '.htm', '.txt', '.md',
         # Office files
@@ -49,7 +49,7 @@ class StaticDir:
         # archives
         '.zip', '.rar', '.7z', '.tar', '.gz', '.bz2', '.xz', '.lz', '.lzma', '.lzo', '.zst', '.zstd',
     )
-    HTML_EXTENSIONS: Final[tuple[str]] = '.html', '.htm'
+    HTML_EXTENSIONS: Final[tuple[str, ...]] = '.html', '.htm'
 
     @staticmethod
     def _default_hidden_predicate(item: os.DirEntry[str]) -> bool:
@@ -64,10 +64,10 @@ class StaticDir:
 
     def __init__(
             self,
-            directory: PathLike[AnyStr] | str,
+            directory: PathLike[str] | str,
             list_dirs: bool = True,
-            listing_template_dir: PathLike[AnyStr] | str = None,
-            listing_template_file: PathLike[AnyStr] | str = 'list_dir.html',
+            listing_template_dir: PathLike[str] | str | None = None,
+            listing_template_file: PathLike[str] | str = 'list_dir.html',
             implicit_exts: Sequence[str] = _DEFAULT_IMPLICIT_EXTS,
             hidden_predicate: Callable[[os.DirEntry[str]], bool] = _default_hidden_predicate,
     ):
@@ -154,7 +154,7 @@ class StaticDir:
         if request.method not in ('GET', 'HEAD'):
             raise HTTPException(status_code=405)
         path, stat_result = self.resolve_path(rel_path)
-        if stat_result is None:
+        if path is None or stat_result is None:  # double-check to make mypy happy
             return self.get_response_404()
 
         if stat.S_ISREG(stat_result.st_mode):
