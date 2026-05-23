@@ -17,6 +17,5 @@ jobs:
           script: |
             cd /home/opc/gws2
             git pull origin main
-            source venv/bin/activate
-            pip install -U -r requirements.txt
+            uv sync --frozen
             sudo systemctl restart gws2

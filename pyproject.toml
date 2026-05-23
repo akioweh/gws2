@@ -1,0 +1,22 @@
+[project]
+name = "gws2"
+version = "2.0.0"
+description = "General-purpose Web Server 2 — Aksite @ akioweh.com"
+authors = [{ name = "akioweh" }]
+requires-python = ">=3.14"
+dependencies = [
+  "fastapi==0.135.*",
+  "jinja2==3.1.*",
+  "mistletoe==1.*",
+  "granian==2.*",
+]
+
+[dependency-groups]
+# Alternative ASGI servers, lazy-imported by run_hypercorn.py / run_uvicorn.py.
+# Not installed by default; `uv sync --group servers` to use them.
+servers = ["hypercorn", "uvicorn"]
+
+[tool.uv]
+# The app is run from the source checkout (granian/uvicorn point at
+# webserver.* modules); it is not installed as a distribution.
+package = false
