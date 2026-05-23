@@ -1,0 +1,950 @@
+#import "/style.typ": aside, note, note-ref, theme
+#import "@preview/booktabs:0.0.4": *
+
+#set document(title: "COMP0199")
+
+#show: theme
+#show: booktabs-default-table-style
+
+#let Var = math.op("Var")
+#let Cov = math.op("Cov")
+
+
+#title()
+
+= Sequences of Functions
+
+$(f_n)_(n=0)^infinity$ or $(f_n)$ denotes the sequence of functions where $f_n : A -> RR$ for all $n in NN$.
+
+/ Sequence of Functions: An assignment of a function $f_n : A -> RR$ to each $n in NN$.
+
+Hereafter, assume $A$ as the domain / target interval.
+
+== Backgroud
+
+For numbers, the sequence $u_n$ tends to $l$ iff.
+$
+  forall epsilon > 0, exists N in NN : n > N => abs(u_n - l) < epsilon
+$
+
+A sequence of numbers $u_n$ is Cauchy if
+$
+  forall epsilon > 0, exists N > NN, forall m, n >= N : abs(u_m - u_n) < epsilon
+$
+
+A sequence is Cauchy iff. it is convergent (in _complete_ metric spaces).
+Note that the Cauchy Criterion does not refer to the limit itself.
+
+
+== Pointwise Convergence
+
+If $lim_(n->infinity) (f_n (a))$ exists and is finite for all $a in A$, \
+we can define the _limit function_ $f : x mapsto lim_(n->infinity) (f_n (x))$. \
+$(f_n (a))_(n in NN)$ is said to *converge _pointwise_* towards $f$.
+
+/ Pointwise Convergence: The sequence $(f_n)_(n in NN)$ converges pointwise to $f : A -> RR$ if
+  $
+    forall x in A, forall epsilon > 0, exists N in NN, forall n > N : abs(f(x) - f_n (x)) < epsilon
+  $
+  I.e., $forall x in A, f_n (x) -> f(x)$ as $n -> infinity$.
+
+
+A sequence of functions $(f_n)$ is pointwise Cauchy if $(f_n (x))$ is Cauchy for all $x$. \
+A sequence is pointwise Cauchy iff. it converges pointwise.
+
+
+== Uniform Convergence
+
+/ Uniform Convergence: The sequence $(f_n)_(n in NN)$ *converges _uniformly_* to $f$ on the interval $A$ if
+  $
+    forall epsilon > 0, exists N in NN, forall x in A, forall n > N : abs(f(x) - f_n (x)) < epsilon
+  $
+  I.e., $sup_(x in A) abs(f_n (x) - f(x)) -> 0$ as $n -> infinity$.
+
+Uniform convergence implies pointwise convergence, to the same limit. (It is _stronger_.)
+
+*Uniformity* is preserved: \
+The limit $f$ continuous if all $f_n$ is continuous and $(f_n)$ converges uniformly.
+
+*Integrals* are preserved: \
+If $(f_n)$ converges uniformly to $f$ on $[a, b]$, then
+$
+  lim_(n->infinity) integral_a^b f_n (x) d x = integral_a^b f(x) d x
+$
+
+*Derivatives* are more complicated: \
+If $(f_n (x_0))$ converges for some $x_0 in [a, b]$ and $(bold(f'_n))$ converges uniformly on $[a, b]$, then
+$
+  lim_(n->infinity) f'_n (x) = f'(x) quad quad ("for" x in [a, b])
+$
+...and the convergence of $(f_n)$ is also uniform.
+
+Note: the uniform convergence on the sequence of derivatives converges the "shape" of the function, while the single-point convergence on the sequence itself asserts that the solution is uniquely well-defined. (Consider $f_n (x) = n + x$.)
+
+
+#pagebreak()
+= Series of Functions
+
+$sum f_n$ denotes the series of functions, i.e., the sum of the sequence $(f_n)$.
+
+== easy stuff
+
+$f = sum f_n$ is more specifically $f : x mapsto sum_(n=infinity)^infinity f_n (x)$. \
+Clearly, this (infinite) sum may be undefined.
+
+The partial sums of a series is a sequence itself: $(sum_(k=0)^n f_k (x))_n$
+
+$sum f_n$ *converges _pointwise_* on $A$ if the sequence of _partial sums_ converges pointwise on $A$.
+
+/ Weierstrass M-Test: A test for determining whether a series of functions converges _normally_: \
+  $sum f_n$ *converges _normally_* on $A$ \
+  if $forall n in NN, forall x in A : abs(f_n (x)) <= M_n$ \
+  for $M_n >= 0$, $sum M_n$ converges.
+
+Note that _normal convergence_ implies *_uniform_* and *_absolute_ convergence*. \
+The Weierstrass M-test may be seen as the Cauchy Criterion for uniform convergence. \
+Furthermore, the $x$-dependence is eliminated by effectively taking the suprema:
+$
+  sup_x abs(sum_(n=N)^infinity f_n (x)) <= sum_(n=N)^infinity sup_x abs(f_n (x)) = sum_(n=N)^infinity M_n -> 0
+$
+- Does not help find the actual limit.
+- Main tool used to test for uniform convergence.
+
+
+== Power Series
+
+/ Power Series: Series of functions of the form $ sum_(n>=0) a_n (x - b)^n $
+
+- "centered" around $b$
+- effectively an infinite polynomial
+
+A power series always converges for certain $x$:
+- trivially true for $x=b$,
+- then there exists a convergent neighborhood around $b$.
+
+/ Radius of Convergence: Some $r >= 0$ where a power series converges uniformly on any closed interval $A subset (b-r, b+r)$. \
+  Divergence when $x in.not [b-r, b+r]$; unknown when $x = b plus.minus r$. \
+  Can be infinite for series convergent everywhere.
+
+/ D'Alembert's Ratio Test: A test to find the radius of convergence $r$ of a power series. \
+  For some $sum_(n >= 0) a_n (x - b)^n$,
+  consider the limit of the sequence of $a$-ratios $L = lim_(n -> infinity) abs(a_(n+1) / a_n)$:
+  $
+    r = cases(
+      1 / L & "if" L != 0,
+      infinity & "if" L = 0,
+      0 & "if" L = infinity
+    )
+  $
+
+I.e., convergence when $abs(x - b) < 1 / L$.
+
+
+== Taylor Series
+
+Taylor Series are a special case of power series. \
+They converge (within the radius) to arbitrary functions.
+
+For a function $f$ infinitely differentiable at $b in RR$, its Taylor Series centered at $b$ is
+$
+  sum_(n>=0) (f^((n))(b)) / n! (x - b)^n
+$
+
+- converges to $f$ in $(b - r, b + r)$
+- Maclaurin Series are a special case where $b=0$
+
+=== Well-known Functions
+
+$
+  e^x & = sum_(n>=0) x^n / n! && = 1 + x + x^2/2! + x^3/3! + ... &&\
+  cos(x) & = sum_(n>=0) (-1)^n / (2n!) x^(2n) && = 1 - x^2/2! + x^4/4! - x^6/6! + ... &&\
+  sin(x) & = sum_(n>=0) (-1)^n / (2n+1)! x^(2n+1) && = x - x^3/3! + x^5/5! - x^7/7! + ... &&\
+  ln(1+x) & = sum_(n>=1) (-1)^(n+1)/n x^n && = x - x^2/2 + x^3/3 - x^4/4 + ... &quad quad& "for" abs(x) < 1, x = 1 \
+  1 / (1 - x) & = sum_(n>=0) x^n && = 1 + x + x^2 + x^3 + ... &quad quad &"for" abs(x) < 1 \
+  arctan(x) & = sum_(n>=0) (-1)^n / (2n+1) x^(2n+1) && = x - x^3/3 + x^5/5 - x^7/7 + ... &quad quad &"for" abs(x) < 1 \
+$
+
+=== Approximations
+
+The degree-$n$ Taylor polynomial of $f$ centered at $b$ is just the series truncated after $n+1$  terms:
+$ T_n (x) = sum_(k=0)^n (f^((k))(b)) / k! (x - b)^k $
+
+$f(x) approx T_n (x)$ for $x approx a$.
+
+$R_n (x) = f(x) - T_n (x)$ is the tail of the terms in the series. \
+There are numerous ways to express this sub-series beyond a simple summation.
+
+/ Lagrange Form of the Taylor Remainder:
+  $ R_n (x) = (f^((n+1)) (xi))/(n+1)! (x-b)^(n+1) $
+  where $xi$ is a function of $x$ and is strictly between $b$ and $x$ (open interval).
+
+The derivation of such a term that "captures" an entire series comes from the Mean Value Theorem; the heavy lifting is done by $xi$, which is a function itself and is _not_ computable, but is bounded and thus provides an upper bound for $R_n (x)$. Let $M = max_(xi in (b, x)) abs(f^((n+1)) (xi))$:
+$ abs(R_n (x)) <= M / (n+1)! abs(x - b)^(n+1) $
+
+Since $M$ is constant, we have, for $x -> b$:
+- $R_n (x) approx abs(x - b)^(n+1)$, or more specifically,
+- $R_n (x) = O((x - b)^(n + 1))$
+- $R_n (x) = o((x - b)^n)$
+
+
+#pagebreak()
+= Linear Algebra
+
+Assume $U$, $V$, and $W$ to be vector spaces. \
+Assume vector spaces to be over the field of $RR$. \
+Assume $+$ over functions be _pointwise addition_ -- $(f + g)(x) = f(x) + g(x)$. \
+
+== easy stuff
+
+/ Linear Independence: A subset $S = {v_1, ..., v_k} subset.eq V$ is linearly independent if \
+  $sum_(i=0)^k a_i v_i = bold(0) quad ==> quad "all" a_i = 0$ \
+
+Alternatively, the map $(a_1, ..., a_k) mapsto a_1 v_1 + ... + a_k v_k$ is injective.
+
+/ Linear: A map $f: V -> W$ is linear iff. \
+  *additivity* $f(u + v) = f(u) + f(v)$ and \
+  *homogeneity* $f(lambda v) = lambda f(v)$ \
+  are preserved (for arbitrary $u, v in V$ and $lambda in FF$). \
+
+Additivity and homogeneity are commonly combined into $f(lambda u + v) = lambda f(u) + f(v)$.
+
+/ Linear Map: A _homomorphism_ (see below) of a _vector space_.
+
+/ Basis: (...of a vector space $V$) is a subset $B subset.eq V$ that is linearly independent and _spans_ $V$.
+
+/ Direct Sum: A structure-_propagating_ Cartesian product#note-ref(<directsum>) with operations defined element-wise.
+  Notated with "oplus" $plus.o$. \
+
+  The above is more specifically an *external* direct sum; an *internal* direct sum _conditionally_ exists for #emph("sub")structures (of a common abelian-group-like structure) iff. their intersection is _trivial_; \
+  For a structure $S$ with substructures $A$ and $B$, \
+  $A plus.o B$ is well-defined#note-ref(<directsuminternal>) ("$A$ and $B$ are in direct sum") iff. $A inter B = {bold(0)}$. \
+
+  / Decomposition Statements: The expression $S = A plus.o B$ asserts that $A$ and $B$ are in direct sum and that their sum is exactly $S$.
+    $ S = A plus.o B quad <==> quad #quote([$A plus.o B$]) #text([*and*]) S = A + B $
+
+
+#note(<directsuminternal>)[
+  Note: with internal direct sums, the $A plus.o B$ notation has overloaded meanings: it denotes the same sum set as $A + B$ while simultaneously _asserting_ that $A inter B = {bold(0)}$.
+]
+
+Alternative definitions of internal direct sum: \
+Substructures $A$ and $B$ of a common $S$ are in direct sum iff. every element of $T = A + B$ can be written in exactly one way as the sum of some $a in A$ and $b in B$. I.e.,
+$ A plus.o B thick <==> thick forall t in T thick exists! (a, b) in A times B : t = a + b $
+Again, $S = A plus.o B$ if also $T = S$.
+A more general version, assuming $V = sum_i V_i$:
+$
+  V = plus.o.big_i V_i quad & <==> quad forall v in V, exists! (v_i)_i in plus.o.big_i V_i : v = sum_i v_i
+$
+Note that the second $plus.o$ denotes the external direct sum.\
+The generalized intersection criteria: $plus.o.big_i V_i quad <==> quad forall i : V_i inter sum_(j!=i) V_j = {bold(0)}$.
+
+#note(<directsum>)[
+  #aside[
+    Note: the _direct product_ is a structure-propagating Cartesian product; \
+    the external direct sum is a direct product with the restriction that the resulting tuples can only have finitely many non-zero elements (which matters if there are infinite operands).
+  ]
+]
+
+If $(u_1, ..., u_n)$ is a basis of $U$ and $(v_1, ..., v_m)$ is a basis of $V$, then $U plus.o V$ iff. $(u_1, ..., u_n, v_1, ..., v_m)$ are linearly independent. ($U$ and $V$ are in the same ambient space.) \
+The internal direct sum is associative; the external direct sum is associative up to isomorphism.
+
+
+/ Composition: For functions $f : B -> C$ and $g : A -> B$, \
+  composition is a binary operator where $f compose g : A -> C, thick x mapsto f(g(x))$.
+
+Composition verifies (for arbitrary functions $f, g, h$):
+- associativity $f compose (g compose h) = (f compose g) compose h$,
+- identity $f compose id = id compose f = f$, and
+- distributivity (over $+$) \
+  right $(f + g) compose h = (f compose h) + (g compose h)$ and \
+  left $f compose (g + h) = (f compose g) + (f compose h)$ *only if* $f$ is _linear_.
+
+#let End = math.op("End")
+
+#aside[
+  $(End(V), +)$ is an abelian group; \
+  $(End(V), +, compose)$ is a ring. \
+  $End(V) := {f : V -> V | f "is linear"}$; see below section on Endomorphisms.
+]
+
+Note that, for linear $f$ (so symmetric distributivity), we obtain the properties as matrix multiplication.
+
+/ Dimension: The dimension of a vector space $V$, notated $dim V$, is the cardinality of (any) basis of $V$. \
+  Note that the Steinitz exchange lemma guarantees any two bases of $V$ have the same cardinality. \
+  $dim thin {0} = 0$.
+
+
+For a function $f : A -> B$:
+/ Injectivity: $forall x, y in A : f(x) = f(y) => x = y$ #h(4pt)i.e., $forall y in im f, exists! x in A : f(x) = y$
+/ Surjectivity: $forall y in B, exists x in A : f(x) = y$ #h(29pt)i.e., $im f = B$
+/ Bijectivity: Injectivity _and_ Surjectivity.
+
+
+== Linear Maps
+
+Assume $f, g, h$ to be linear maps, and by default $f : V -> W$.
+
+/ Image: $im f := {f(v) | v in V} quad = f(V) subset.eq W$
+/ Kernel: $ker f := {v in V | f(v) = bold(0)}$
+/ Rank: $op("rank") f = dim im f$
+/ Rank-Nullity Theorem: $op("rank") f + dim ker f = dim V$
+
+Note that Rank is only defined for images of finite dimension, and \
+Rank-Nullity Theorem assumes $V$ to have finite dimension too.
+
+/ Kernel criterion for Injectivity: $f$ is injective iff. $ker f = {bold(0)}$.
+
+Clearly, injectivity implies $dim W >= dim V$. (Can be proved using the Rank-Nullity Theorem.)
+
+/ Matrix Column Rank criterion for Injectivity: $f$ is injective iff. for a matrix $M$ representing $f$, its columns are linearly independent. \
+
+Clearly, surjectivity implies $dim V >= dim W$. (Can be proved using the Rank-Nullity Theorem.)
+
+Note that any linear map can be made surjective trivially by setting its codomain ($W$) to its image.
+
+/ Isomorphism: Both-way-_structure-preserving_ bijections.
+
+Examples of structure properties to preserve: linearity, group operation. \
+The _structure_ of vector spaces is linearity, and linear maps are, well, linear bidirectionally, so all *bijective linear maps are isomorphisms*.
+
+Note#super("2"): The concept of _structure-preserving maps_ come from category theory, where categories explicitly define its such maps, called _morphisms_; vector spaces' morphisms are linear maps by definition, so bijective linear maps are isomorphisms :shrug:. \
+
+Clearly, bijectivity implies $dim V = dim W$. \
+Intuitive way to express bijectivity: $forall w in W, exists! v in V : f(v) = w$.
+
+Two structures are _isomorphic_ iff. there exists an isomorphism between them. \
+For $V$ and $W$ over the same field, $dim V = dim W$ iff. they are isomorphic.
+
+Matrix representations of a bijection must be square. \
+A matrix is invertible iff. it represents a bijection.
+
+== Endomorphisms
+
+/ Endomorphism: A map $f: V -> V$; same domain and codomain.
+/ Automorphism: An endomorphism that is also an isomorphism.
+
+For endomorphisms, *injectivity, surjectivity, and bijectivity are equivalent* (in finite dimension).
+
+$f$ is bijective iff. it maps a basis to a basis.
+
+=== Change of Basis
+
+Consider an endomorphism $f$ of $V$ represented by matrix $M$ in the basis $B_1$.
+
+$N = P^(-1) M P$ is the matrix representing $f$ in $B_2$ where
+$P$ is a matrix whose columns are the coordinate vectors of $B_2$ in $B_1$. \
+
+/ Transition Matrix: (aka. change-of-basis matrix) what $P$ is above.
+
+Observe that if $P^(-1) M P = N$, then $P N P^(-1) = M$.
+
+
+
+#pagebreak()
+= Matrix Reduction
+
+Assume $V$ denotes some finite-dimensional vector space over $FF$ ($= RR$ or $CC$, as specified). \
+Assume $T : V -> V$ denotes some endomorphism of $V$. \
+Assume $M in cal(M)_(n,n)$ is the matrix representation of any such $T$.
+
+Observe that as $T$ is an endomorphism and $n = dim V$, we can always represent it as some square matrix.
+
+== Abstract ahh Stuff
+
+/ Invariant Subspace: (aka. stable subspace) $U subset.eq V$ is an invariant subspace under $T$ if $T(U) subset.eq U$. \
+  I.e., $forall u in U : T(u) in U$.
+
+Observe that $V$ and ${bold(0)}$ are always invariant subspaces under _any_ $T$; \
+$ker T$ and $im T$ are always invariant subspaces under a given $T$. \
+Note: it is also written "$U$ is #box[$T$-invariant]" for some subspace $U$ and transformation $T$.
+
+#aside[
+  Highly relevant to the concepts below: the #link("https://akioweh.com/shared/COMP0147#more-abstract-algebra-that-is-definitely-in-the-course-span-idabstract-algebraspan")[COMP0147 notes] on _cosets_ and _quotient groups_.
+]
+
+Assume $U subset.eq V$ a subspace.
+
+/ Coset: For any $v in V$, the coset $v + U$ (or $[v]$ in _equivalence class_ notation) is the set ${v + u | u in U}$.
+
+/ Quotient Space: A quotient (vector) space $V \/ U$ is a new vector space over the set of all cosets of $U$. \
+  I.e., $V \/ U$'s carrier set is ${{v + u | u in U} | v in V}$. \
+  Vector operations are defined as
+  $[x] + [y] = [x + y]$ and
+  $c[x] = [c x]$. \
+  Observe that $dim (V \/ U) = dim V - dim U$.
+
+Note: there are no conditions on $U$; one can form a quotient vector space from _any_ subspace.
+(Due to addition being abelian and multiplication being external.)
+This is contrary to general groups or rings, which require specific properties (normal subgroups or ideals) on the substructure.
+
+/ Complementary Subspace: A subspace $W subset.eq V$ is complementary to $U$ iff. $V = U plus.o W$. \
+  Construction from a Quotient Space: \
+  Pick a basis ${[v_1], ..., [v_k]}$ for $V \/ U$. \
+  Pick a $tilde(v)_i in [v_i]$ as a _representative_ for every coset in the basis. \
+  $W = op("span"){tilde(v)_1, ..., tilde(v)_k}$ is a subspace complementary to $U$.
+
+Complements to a subspace are generally *non-unique*, and a complementary subspace can be viewed geometrically as a _section_ of the corresponding quotient space.
+However, the addition of an inner product (to define orthogonality) allows the construction of a unique, *canonical* complement $U^perp$. \
+(See _Orthogonality_ subsection below.)
+
+#aside[
+  Observe that $W tilde.equiv (V \/ U)$ for any complement $W$.
+  Specifically, the $W$-restriction of the projection map $pi|_W : W -> V \/ U$ is an isomorphism.
+
+  The construction above produces a linear map $s : V \/ U -> V$ with $pi compose s = id_(V \/ U)$, called a _section_ (or _splitting_) of the projection $pi : V -> V \/ U$.
+  Its image is the complement $W$.
+  Given a choice of $s$, the map $(u,[v]) mapsto u + s([v])$ provides an _explicit_ isomorphism $U plus.o (V \/ U) tilde.equiv V$.
+  Because this isomorphism relies on the arbitrary choice of representatives to build $s$, there is no _canonical_ isomorphism between $V$ and $U plus.o (V \/ U)$.
+]
+
+== Block Matrices
+
+For a $T$-invariant $U$, one can construct, in a deliberate basis, a _block triangular_ matrix. \
+Let $W$ be a subspace complementary to $U$.
+
+Pick a basis $B_U = (u_1, ..., u_k)$ for $U$ and a basis $B_W = (w_1, ..., w_(n-k))$ for $W$. \
+$B = (u_1, ..., u_k, w_1, ..., w_(n-k))$ is then a basis for $V$. (Since $V = U plus.o W$.)
+
+Now, we construct a matrix $M$ for $T$ in $B$. \
+Recall that a matrix can be constructed column-wise for $b in B$ as $T(b)$'s coordinates (in $B$):
+$
+  M =
+  mat(
+    arrow.t, , arrow.t, arrow.t, , arrow.t;
+    T(u_1), dots.c, T(u_k), T(w_1), dots.c, T(w_(n-k));
+    arrow.b, , arrow.b, arrow.b, , arrow.b
+  )
+  = mat(
+    augment: #(vline: 1, hline: 1, stroke: 0.4pt),
+    gap: #1em,
+    A, B;
+    0, C
+  )
+$
+
+...where $A$ is a $k times k$ block; $0$ is a $(n-k) times k$ block of zeroes.
+
+Observe:
+- $A$ is the $B_U$-coordinates of $T(U)$
+- $0$ is the $B_W$-coordinates of $T(U)$, which are zero since $U$ is invariant
+- $B$ is the $B_U$-coordinates of $T(W)$
+- $C$ is the $B_W$-coordinates of $T(W)$
+
+Observe that $B$ will be zeroes if $W$ is _also_ invariant, yielding a _block diagonal_ matrix.
+
+*Usefully*, $det(M) = det(A) times det(C)$ and $chi_M = chi_A times chi_C$.
+
+== Eigenvalues and Eigenvectors
+
+/ Eigenvector: A nonzero vector $v in V$ is an eigenvector of some $T$ iff. there exists a scalar $lambda in FF$ where $T(v) = lambda v$.
+
+/ Eigenvalue: The scalar $lambda$ above is the eigenvalue of $T$ _corresponding_ to the eigenvector $v$.
+
+Other equations characterizing eigenvalues and eigenvectors wrt. matrix representations include
+$
+  (M - lambda I) v = bold(0) quad "or" quad v in ker (M - lambda I)
+$
+(See section below on the computational utility of these.)
+
+An eigenvector's span is an invariant subspace where the associated endomorphism acts like a scaling: \
+An eigenvector spans a 1-dimensional invariant subspace, and a linear transformation on 1-dimensional invariant subspaces can _only_ be a scaling.
+
+/ Eigenspace: For a given eigenvalue $lambda$, we have its eigenspace $E_lambda = ker (M - lambda I) subset.eq V$. \
+  Equivalently, $E_lambda = op("span"){v_1, ..., v_k}$ where ${v_1, ..., v_k}$ is a basis of eigenvectors for $lambda$ (and $k$ is the geometric multiplicity).
+
+Observe that any $v in E_lambda \\ {bold(0)}$ is an eigenvector corresponding to $lambda$. \
+Observe that ${"eigenspaces of" T} subset.neq {"invariant subspaces of" T}$. (Unequal in nontrivial cases.)
+
+/ Geometric Multiplicity: The geometric multiplicity of an eigenvalue $lambda$ of $M$, $gamma_M (lambda)$, is $dim E_lambda$. \
+  This is the "physical" dimension of the associated eigenspace.
+
+/ Algebraic Multiplicity: The algebraic multiplicity of an eigenvalue $lambda$ of $M$, $alpha_M (lambda)$, is its multiplicity as a root of $chi_M$ ($M$'s characteristic polynomial; see below).
+
+/ Spectrum: The spectrum of some $T$ is the multiset of all its eigenvalues (with algebraic multiplicity).
+
+/ Linear Independence of Eigenvectors: For _distinct_ eigenvalues $lambda_1, ..., lambda_k$, their corresponding eigenvectors $v_1, ..., v_k$ are linearly independent. \
+  _Alternatively: Take a basis for each eigenspace; the union of all these bases, across distinct eigenvalues, is linearly independent._\
+  This allows the construction of bases out of eigenvectors if we have enough eigenvalues.
+
+
+=== Computing Eigenvalues
+
+Assume $v in V != bold(0)$ and $lambda in FF$.
+
+Derivation from $M v = lambda v$ to the _characteristic polynomial_:
+$
+                 M v & = lambda v \
+      M v - lambda v & = bold(0) \
+  M v - lambda (I v) & = bold(0) \
+    (M - lambda I) v & = bold(0)
+$
+
+Observe that a given $lambda$ is a solution \
+$<==>$ $ker (M - lambda I)$ is non-trivial \
+$<==>$ $M - lambda I$ is not injective $<=>$ surjective $<=>$ bijective \
+$<==>$ $M - lambda I$ is not _invertible_ \
+$<==>$ $det(M - lambda I) = 0$. \
+I.e., any $lambda$ that satisfies any statement above is an eigenvalue, and the set of all such solutions are the eigenvalues of the transformation represented by $M$.
+
+
+/ Characteristic Polynomial: The characteristic polynomial $chi_M$ for matrix $M$ is
+  $ chi_M (lambda) = det(M - lambda I) $
+  The roots of $chi_M$ (expanding $det$ with the Leibniz formula) are exactly the eigenvalues of $M$. \
+
+#aside[
+  $
+    chi_M (lambda) = det(lambda I - M) = det(
+      mat(
+        lambda, 0, ..., 0;
+        0, lambda, ..., 0;
+        dots.v, dots.v, dots.down, dots.v;
+        0, 0, 0, lambda;
+      )
+      - M
+    )\
+    = lambda^n + a_(n-1) lambda^(n-1) + ... + a_2 lambda^2 + a_1 lambda + a_0
+  $
+
+  Aside#super[2]: there's a very subtle (and mostly insignificant) difference between $det(M - lambda I)$ and $det(lambda I - M)$.
+  I refuse to elaborate further.
+
+]
+
+Observe that $T: V -> V$ cannot have more than $n = dim V$ eigenvalues (or eigenspaces). \
+Observe that $chi_M$ has degree $n$. \
+$0$ is a root of $chi_M$ iff. $det(M) = 0$
+
+
+=== Computing Eigenvectors
+
+Obviously, we just compute $ker (M - lambda I)$ for a given $lambda$ to obtain its eigenspace.
+
+
+== Polynomials and Linear Maps
+
+The characteristic polynomial computes eigenvalues. \
+The roots and their multiplicity provide information on possible reductions (see below).
+
+/ Complex vs Real fields: \
+  Per the fundamental theorem of algebra, not all roots of the characteristic polynomial may be real. \
+  For $FF = RR$, some $n times n$ matrix $M$ has $<= n$ eigenvalues. \
+  For $FF = CC$, $M$ has exactly $n$ eigenvalues (counted with algebraic multiplicity).
+
+Recall that polynomials in $RR$ factor into linear _and_ irreducible quadratic factors, while polynomials in $CC$ factor fully into linear factors.
+
+If $FF = RR$, $chi_M$ factors into distinct irreducible quadratic terms $P_i$ and linear terms.
+$
+  chi_M (x) = a times P_1^(r_1)(x) times ... times P_k^(r_k)(x) times (x - lambda_1)^(s_1) times ... times (x - lambda_j)^(s_j)
+$
+
+If $FF = CC$:
+$
+  chi_M (x) = a times (x - lambda_1)^(r_1) times ... times (x - lambda_m)^(r_m)
+$
+
+/ Annihilating Polynomial: A polynomial $P$ over $FF$ is an annihilating polynomial for $M$ if \
+  $P(M) = 0$.
+
+/ Minimal Polynomial: The _monic_ polynomial $mu_M$ over $FF$ of least degree that annihilates $M$; $mu_M (M) = 0$
+
+/ Cayley-Hamilton Theorem: Square matrices are annihilated by their own characteristic polynomials; $forall M in cal(M)_(i, i) : chi_M (M) = 0$ \
+  Effectively, this means ${I, M, M^2, ..., M^n}$ is linearly dependent, and $chi_M$ itself demonstrates the exact dependence (via the coefficients).
+  E.g., one can:
+  - compute matrix inverses cheaply (by rearranging $chi_M (M)$)
+  - represent high powers $M^k$ where $k >= n$ as some linear combination of the lower powers
+
+
+== Matrix Reduction
+
+Recall that a given matrix is just _one_ representation of a linear transformation and is implicitly associated with a chosen basis. \
+Different bases thus correspond to different matrices that still represent the same transformation.
+
+- We want diagonal matrices as they're computationally advantageous.
+- While some $T$'s matrix $M$ in the standard basis may not be diagonal, it may have a diagonal representation under a different basis.
+- Such a basis is precisely an _eigenbasis_ -- a basis consisting only of eigenvectors.
+
+/ Eigenbasis: For a transformation $T$, an _eigenbasis_ is a basis of $V$ consisting only of eigenvectors of $T$.
+
+/ Diagonalization: For a matrix $M$ and its transformation $T$, $M$ is _diagonalizable_ iff. an eigenbasis exists for $T$. \
+  Constructing $P$ with the eigenbasis as columns, we obtain a change-of-basis matrix s.t. $D = P^(-1)M P$ is diagonal.
+
+Further properties:
+- the entries of $D$ are the eigenvalues of $M$ (with multiplicity)
+- $M$ is diagonalizable iff. $mu_M$ splits into _distinct_ linear factors.
+- $M$ is diagonalizable iff. $alpha_M (lambda) = gamma_M (lambda)$ for all eigenvalues $lambda$.
+- Powers of $M$ are easy to compute: $M^k = P D^k P^(-1)$ (where $D^k$ is just diagonal entries raised to $k$).
+- Similarly, for any analytic function $f$ (e.g., $e^M$): $f(M) = P f(D) P^(-1)$.
+
+/ Kernel Decomposition Theorem: If the minimal polynomial of $T$ is split into pairwise coprime factors $p(x) = p_1 (x)^(r_1) ... p_k (x)^(r_k)$, then $V$ decomposes into a direct sum of the factors' kernels:
+  $
+    V = ker(p_1 (T)^(r_1)) plus.o ... plus.o ker(p_k (T)^(r_k))
+  $
+
+Following the complete factorization of the characteristic polynomial, we have...\
+For $FF = RR$:
+$
+  V = ker(P_1^(r_1)(M)) plus.o ... plus.o ker(P_n^(r_k)(M)) plus.o ker((M - lambda_1 I)^(s_1)) plus.o ... plus.o ker((M - lambda_j I)^(s_j))
+$
+For $FF = CC$:
+$
+  V = ker((M - lambda_1 I)^(r_1)) plus.o ... plus.o ker((M - lambda_m I)^(r_m))
+$
+Note that every term and its power $r$ or $s$ directly correspond to the factorization of $chi_M$.
+
+/ Generalized Eigenspace: For an eigenvalue $lambda$ with algebraic multiplicity $m = alpha_M (lambda)$, the generalized eigenspace is
+  $ K_lambda = ker((M - lambda I)^m) $
+  - Its elements are _generalized eigenvectors_.
+  - $dim K_lambda = alpha_M (lambda)$ (always, unlike eigenspaces where $dim E_lambda <= alpha_M (lambda)$).
+  - While the direct sum of eigenspaces $plus.o.big E_lambda$ may not span $V$, the direct sum of generalized eigenspaces always does (if $chi_M$ splits, e.g., over $CC$):
+    $ V = plus.o.big_i K_(lambda_i) $
+
+/ Triangularizable: A matrix $M$ is similar to an upper-triangular matrix iff. its characteristic polynomial $chi_M$ splits fully into linear factors over $FF$.
+  - Since $CC$ is algebraically closed, all matrices over $FF = CC$ are upper-triangularizable.
+  - A real matrix is triangularizable over $RR$ iff. all its eigenvalues are real. If it has irreducible quadratic factors, it cannot be triangularized (but can be block-triangularized with $2 times 2$ blocks).
+
+/ Jordan Canonical Form:
+  Every matrix whose characteristic polynomial splits is similar to a block-diagonal matrix of _Jordan blocks_:
+  $
+    J = mat(J_(d_1)(lambda_1), 0, dots.c, 0; 0, J_(d_2)(lambda_2), dots.c, 0; dots.v, dots.v, dots.down, dots.v; 0, 0, dots.c, J_(d_k)(lambda_k))
+    quad "where" quad
+    J_d (lambda) = mat(lambda, 1, 0, dots.c, 0; 0, lambda, 1, dots.c, 0; dots.v, dots.v, dots.down, dots.down, dots.v; 0, 0, dots.c, lambda, 1; 0, 0, dots.c, 0, lambda)
+  $
+
+
+#pagebreak()
+= Differential Calculus
+
+== Homogeneous Linear DEs
+
+/ Homogeneous Linear Differential Equation: (HLDE) A linear differential equation of the form
+  $ a_n y^((n)) + a_(n-1) y^((n-1)) + ... + a_1 y' + a_0 y = 0 $
+
+/ Principle of superposition: The linear combination of any two solutions to a HLDE is also a solution. \
+  This is due to the differential operator being linear.
+
+The general solution to an $n$-th order HLDE is a linear combination of $n$ linearly independent solutions.
+
+#aside[
+  Let $D = dif / (dif x)$ be the linear differential operator. The HLDE can be written as:
+  $ P(D) y = 0 $
+  where $P(z) = a_n z^n + ... + a_1 z + a_0$ is the characteristic polynomial. \
+  Clearly, solving the HLDE is equivalent to solving for $ker(P(D))$.
+
+  / Spectral Mapping Theorem: For any $T$ and polynomial $P$, if $v$ is an eigenvector of $T$ with eigenvalue $lambda$, then $v$ is also an eigenvector of $P(T)$ with eigenvalue $P(lambda)$:
+    $ T v = lambda v quad ==> quad P(T) v = P(lambda) v $
+
+  Applying this to $T = D$, whose eigenfunctions are $y = e^(lambda x)$ with eigenvalue $lambda$ (since $D(e^(lambda x)) = lambda e^(lambda x)$), we get:
+  $ P(D) e^(lambda x) = P(lambda) e^(lambda x) $
+
+  Thus, if some $lambda$ satisfies $P(lambda) = 0$, then $P(D) e^(lambda x) = 0$, meaning the eigenfunction $e^(lambda x) in ker(P(D))$ is a solution.
+]
+
+The general solution is built from the roots of the characteristic polynomial $chi(lambda) = P(lambda) = 0$:
+
++ *Distinct Real Roots*: For each real root $lambda_i$, there is a solution $e^(lambda_i x)$.
++ *Repeated Real Roots*: For a real root $lambda$ with multiplicity $m$, the kernel contains the $m$ linearly independent solutions:
+  $ e^(lambda x), thick x e^(lambda x), thick ..., thick x^(m-1) e^(lambda x) $
++ *Complex Conjugate Roots*: Since the coefficients $a_i$ are real, complex roots appear in conjugate pairs $lambda = a plus.minus i b$.
+  - These yield complex solutions $e^((a plus.minus i b)x) = e^(a x) e^(plus.minus i b x) = e^(a x)(cos(b x) plus.minus i sin(b x))$.
+  - Taking the real and imaginary parts (which are linear combinations) yields two real, linearly independent solutions:
+    $ e^(a x) cos(b x) quad "and" quad e^(a x) sin(b x) $
+  - If repeated with multiplicity $m$, multiply these by powers $x^k$ for $k < m$.
+
+#aside[
+  For complex conjugate solutions $y_1 = u + i v$ and $y_2 = u - i v$, their real and imaginary parts are linear combinations of the conjugate pair themselves:
+  $ u = (y_1 + y_2) / 2 quad "and" quad v = (y_1 - y_2) / (2i) $
+  By superposition, these linear combinations are also solutions, and they are guaranteed to be real-valued and linearly independent.
+]
+
+== Multivariate Functions
+
+/ Fubini's Theorem: For a function $f : RR^2 -> RR$ that is continuous over a rectangle $X times Y$ ($X$ and $Y$ are intervals), the double integral can be computed as an iterated integral:
+  $
+    integral.double_(X times Y) f(x, y) dif(x, y) = integral_X (integral_Y f(x, y) dif y) dif x = integral_Y (integral_X f(x, y) dif x) dif y
+  $
+  This double-to-iterated conversion is valid for any shape of area as long as $f$ is continuous over it.
+
+/ Gradient: A representation of the first derivative of a multivariate function. \
+  For a function $f : RR^n -> RR$, the gradient of $f$ at some point $x = (x_1, ..., x_n) in R^n$ is the vector of partial derivatives:
+  $ gradient f = vec((partial f) / (partial x_1), ..., (partial f) / (partial x_n)) $
+  The gradient points in the direction of steepest ascent, and its magnitude is the rate of increase in that direction.
+
+/ Hessian: A representation of the second derivative of a multivariate function. \
+  For a function $f : RR^n -> RR$, the Hessian of $f$ at some point $x = (x_1, ..., x_n) in R^n$ is the matrix of second partial derivatives:
+  $
+    (bold(cal(H))_f)_(i,j) = (partial^2 f) / (partial x_i partial x_j) \
+    bold(cal(H))_f = mat(
+      (partial^2 f) / (partial x_1^2), (partial^2 f) / (partial x_1 partial x_2), ..., (partial^2 f) / (partial x_1 partial x_n);
+      (partial^2 f) / (partial x_2 partial x_1), (partial^2 f) / (partial x_2^2), ..., (partial^2 f) / (partial x_2 partial x_n);
+      dots.v, dots.v, dots.down, dots.v;
+      (partial^2 f) / (partial x_n partial x_1), (partial^2 f) / (partial x_n partial x_2), ..., (partial^2 f) / (partial x_n^2)
+    )
+    = bold(upright(J))(gradient f)^top
+  $
+
+  The Hessian is used to analyze the local curvature of $f$ and classify stationary points.
+
+== Stationary Points
+
+If the second partial derivatives of $f$ are continuous near a point $x$, then
+$(partial^2 f) / (partial x partial y) (x) = (partial^2 f) / (partial y partial x) (x)$. \
+Consequently, the Hessian is symmetric for any $f$ with continuous second partial derivatives.
+
+Classification of Stationary point $x$:
+- $det(bold(cal(H))_f (x)) > 0$ \
+  - If $(partial^2 f) / (partial x_1^2) (x) > 0$, then $x$ is a local minimum.
+  - If $(partial^2 f) / (partial x_1^2) (x) < 0$, then $x$ is a local maximum.
+- $det(bold(cal(H))_f (x)) < 0$ \
+  $x$ is a saddle point.
+- $det(bold(cal(H))_f (x)) = 0$ \
+  inconclusive
+
+#pagebreak()
+= Euclidean Spaces
+
+Continue assuming $V$ is a finite-dimensional vector space over $FF = RR$ _or_ $FF = CC$; \
+$u, v, w in V$ and $a, b in FF$.
+
+== Inner Products
+
+#let inner(a, b) = $chevron.l #a ""comma #b chevron.r$
+
+#aside[
+  The _canonical_ inner product is the dot product.
+]
+
+/ Inner Product: Additional structure on a $V$ as a binary operation $inner(dot, dot) : V times V -> FF$ satisfying:
+  + Conjugate symmetry: $inner(v, w) = overline(inner(w, v))$
+  + Linearity in the first argument: $inner(a v + b w, u) = a inner(v, u) + b inner(w, u)$
+  + Positive-definiteness: $u != 0 ==> inner(u, u) > 0$
+
+
+Observe that for $FF = RR$, $x = overline(x)$, so 1. is reduced to simple symmetry, and 2. extends to bilinearity. \
+Also, for $FF = CC$, 1. implies that $inner(u, u) in RR$.
+
+Implied properties:
+- $inner(0, u) = inner(u, 0) = 0$
+- $inner(u, u) = 0 <==> u = 0$ (A way to prove zero-ness of a vector)
+- $inner(u, a v + b w) = overline(a) inner(u, v) + overline(b) inner(u, w)$; i.e., conjugate-linearity in the second argument (_sesquilinear_).
+
+The inner product is a _symmetric positive-definite bilinear form_ for $FF = RR$, and a _positive-definite sesquilinear form_ for $FF = CC$.
+
+/ Inner Product Space: A vector space equipped with an inner product.
+
+/ Euclidean Space: An inner product space over $RR$.
+
+/ Matrix Representation of Inner Product: A matrix $M in cal(M)_(n,n)$ represents the inner product $ inner(u, v) = u^top M v $ for $u, v in RR^n$ iff. $M$ is symmetric and positive-definite; i.e.,
+  - $M^top = M$
+  - $v != 0 ==> v^top M v > 0$
+
+#aside[
+  For $FF = CC$, replace "transposition" $x^top$ with "conjugate transposition" $x^dagger = overline(x)^top$ and these conditions remain true.
+]
+
+I.e., (in finite dimension), every inner product can be represented as a matrix, and every matrix satisfying said conditions represents an inner product.
+
+$inner(dot, dot)_M$ denotes the inner product represented by $M$.
+
+=== Infinite Dimension
+
+Let's for example consider functions $f, g : RR -> RR$ on the interval $[a, b]$.
+
+The _canonical_ inner product is
+$
+  inner(f, g) = integral_a^b f(x) g(x) dif x
+$
+
+#aside[
+  Symmetry comes from the commutativity of multiplication; \
+  linearity is inherited from that of integration; \
+  positive-definiteness is inherited from $RR$ as a group.
+]
+
+== Norms
+
+/ Norm: A function $norm(dot) : V -> RR$ satisfying:
+  + Subadditivity (triangle inequality): $norm(v + w) <= norm(v) + norm(w)$
+  + Absolute homogeneity: $norm(a v) = |a| norm(v)$
+  + Positive-definiteness: $u != 0 ==> norm(u) > 0$
+
+/ Induced Norm: Every inner product naturally _induces_ a norm via $ norm(u) = sqrt(inner(u, u)) $
+  Note that the proof of the triangle inequality relies on the Cauchy-Schwarz inequality (below).
+
+#aside[
+  The other direction, i.e., whether a norm induces an inner product, requires the _parallelogram law_ $norm(u + v)^2 + norm(u - v)^2 = 2 (norm(u)^2 + norm(v)^2)$.
+]
+
+/ Euclidean Norm: The norm induced by the canonical inner product in Euclidean spaces. E.g., $ norm(vec(x, y)) = sqrt(inner(vec(x, y), vec(x, y))) = sqrt(vec(x, y) dot vec(x, y)) = sqrt(x^2 + y^2) $
+
+/ Cauchy-Schwarz Inequality: In any inner product space $V$, \
+  $abs(inner(v, w))^2 <= inner(u, u) inner(v, v)$ \
+  or, assuming the induced norm, \
+  $abs(inner(v, w)) <= norm(v) norm(w)$.
+
+Note that the Cauchy-Schwarz inequality is a consequence of the axioms of inner products; it is not an axiom itself, but it is a non-trivial result that helps prove, e.g., $sqrt(inner(u, u))$ is indeed a norm.
+
+== Metrics
+
+/ Metric (function): (Aka. distance) A function $d : A times A -> RR$ satisfying:
+  + Symmetry: $d(x, y) = d(y, x)$
+  + Positive-definiteness: $d(x, y) >= 0$ and $d(x, y) = 0 <==> x = y$
+  + Triangle inequality: $d(x, z) <= d(x, y) + d(y, z)$
+  for all $x, y, z in A$.
+
+/ Metric Space: A structure $(A, d)$ where $d : A times A -> RR$ is a metric.
+
+/ Induced Metric: Inner product spaces induce the metric $d(u, v) = norm(u - v)$.
+
+#aside[
+  Every inner product space is canonically a metric space using its induced norm and thus induced metric.
+]
+
+== Orthogonality
+
+// Assume $V$ now to be an Euclidean space.
+
+/ Orthogonality: For an inner product space, two vectors are orthogonal $v perp w$ iff. $inner(v, w) = 0$.
+
+/ Generalized Pythagorean Theorem: For an inner product space with the induced norm $norm(dot)$, $ v perp w quad ==> quad norm(v + w)^2 = norm(v)^2 + norm(w)^2 $
+
+/ Orthonormal Basis: A basis where vectors are pairwise orthogonal and of unit norm.
+
+The coordinates of a vector in an orthonormal basis are easily computed via the inner product;
+for a basis $(b_1, ..., b_n)$ and a vector $v$, $v = inner(v, b_1) b_1 + ... + inner(v, b_n) b_n$.
+
+Every orthonormal family of vectors is linearly independent, and every finite-dimensional inner product space has an orthonormal basis.
+
+/ Orthogonal Complementary Subspace: A given inner product subspace $W subset.eq V$ has a unique orthogonal complement (aka., the canonical complement)
+  $
+    W^perp = {v in V | inner(v, w) = 0 thick forall w in W}
+  $
+
+Clearly, \
+$V^perp = {0}$ and ${0}^perp = V$ \
+$V = W + W^perp$
+
+For an orthonormal basis $(w_1, ..., w_k)$ of $W subset.eq V$, we can define the _orthogonal projection_ s.t.
+$ P_W (v) = inner(v, w_1) w_1 + ... + inner(v, w_k) w_k $
+
+Clearly, $P_W (v) in W$ and $v - P_W (v) in W^perp$.
+
+/ Orthogonal Matrix: A matrix $M in cal(M)_(n, n)$ is orthogonal iff. its columns form an orthonormal basis. Alternatively, $M^top M = I$ or $M^top = M^(-1)$.
+
+/ Real Spectral Theorem: For a real symmetric matrix $M$,
+  - $M$ has a full eigenbasis
+  - The eigenbasis can be chosen to be orthonormal
+
+  Consequently, $M$ is orthogonally diagonalizable: there exists an orthogonal matrix $P$ s.t. \ $D = P^top M P$ is diagonal.
+
+For *real symmetric matrices*,
+- eigenvectors are orthogonal (and eigenvalues are real)
+- positive-definiteness $<==>$ (strictly) positive eigenvalues (*useful property*)
+
+This eigenvalue condition for positive-definiteness allows the _easier_ classification of matrices as inner products.
+
+Recall that matrix representations of inner products are symmetric; \
+they can thus always be diagonalized. \
+Furthermore, positive eigenvalues allows normalization of an diagonal form into the identity matrix, so *every inner product can be represented as the canonical inner product in some basis*.
+
+Advantages of an orthonormal basis:
++ Coordinates are easily computed via the inner product.
++ Inner products become the canonical dot product.
++ Orthogonal projections have a closed form (inner product).
++ Change of basis matrices between orthonormal bases are orthogonal.
++ A bunch more...
+
+
+#pagebreak()
+= Numerical Methods
+
+
+
+#pagebreak()
+= Probabilities
+
+PDF:
+1. $f : T mapsto RR$
+2. $forall x in T : f(x) >= 0$
+3. $integral_T f(x) dif x = 1$
+
+$
+  Pr(a <= X <= b) = integral_a^b f(x) dif x
+$
+
+Evidently, $Pr(X = a) = 0$.
+
+Cumulative DF:
+$
+  F_X(x) = Pr(X <= x) = integral_(-infinity)^x f(t) dif t
+$
+
+
+also written as $mu$:
+$
+  E[X] = integral_(-infinity)^infinity x f(x) dif x \
+  E[X] = sum_T x Pr(X = x)
+$
+
+$
+  op("Cov")(X, Y) & = E[(X - E[X])(Y - E[Y])] \
+                  & = E[X Y] - E[X]E[Y] \
+     op("Var")(X) & = E[(X - E[X])^2] \
+                  & = E[X^2] - E[X]^2 \
+$
+$
+  op("Var")(X) = integral_T x^2 f(x) dif x - mu^2 = integral_T (x - mu)^2 f(x) dif x
+$
+
+$op("Cov")(X, Y) = 0$ if $X$ and $Y$ are independent.
+
+== classic distros
+
+=== Exponential
+
+$
+  X tilde op("Exp")(lambda) \
+  f(x) = lambda e^(-lambda x) quad {x >= 0} \
+  E[X] = 1/lambda \
+  Var(X) = 1/lambda^2
+$
+
+=== Uniform
+
+$
+  X tilde U(a, b) \
+  f(x) = 1/(b - a) quad {a <= x <= b} \
+  E[X] = (a + b)/2 \
+  Var(X) = ???
+$
+
+=== Normal
+
+$
+  X tilde N(mu, sigma^2) \
+  f(x) = y e a h \
+  E[X] = mu \
+  Var(X) = sigma^2
+$
+
+
+=== what
+
+and whatever Student's t-distribution and Chi-squared distribution are.
+
+
+== Multivariate
+
+...joint probability distributions...
+
+_marginal distributions_ are single-variate distributions at some fixed values of all other variables. (E.g. a "slice" of a 2-d distribution.)
+
+
+
+*Law of Large Numbers*: \
+For a sequence of _independent and identically distributed_ (i.i.d.) random variables, the sum
+
+
+#pagebreak()
+= Statistics
+
+
