@@ -2,6 +2,7 @@ name: Dih
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
